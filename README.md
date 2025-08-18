@@ -6,3 +6,5 @@ Psi is a mod about spell programming, inspired by Mahouka. Check out the [websit
 This mod requires [Patchouli](https://github.com/Vazkii/Patchouli).
 
 Psi is licensed under the [Psi License](http://psi.vazkii.net/license.php)
+
+代码由ai完成
