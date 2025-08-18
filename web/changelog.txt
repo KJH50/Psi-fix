@@ -1,0 +1,496 @@
+1.21-106
+* Updated to newer NeoForge versions
+* Fixed crash when launching server
+* Added flash ring
+* Misc cleanups & performance improvements
+1.21-103
+* Updated to 1.21! Massive shoutout to TheidenHD as without them this port
+would not have been possible.
+* Not real feature changes otherwise.
+1.20.1-102
+* Updated to 1.20! Massive shoutout to TheidenHD as without them this port would not have been possible.
+* No real feature changes, only bug fixes.
+* The author of this changelog was gone for too long that they have no idea what the hell they missed.
+* Fix Trick: Break Loop applying on non-loopcast related contexts. (Thanks GDavid04!)
+r1.1-77
+*Removed the now irrelevant energy cap message.
+*[API] Added a helper method for detonating.
+*[API] Added DetonationEvent.
+*[API] CADs can now be provided by other items.
+*[API] Increased version number to 15.
+r1.1-76
+*Fixed invalid spells crashing the server.
+*Fixed some tooltips having format errors.
+r1.1-75
+*Added a section including spell data to crash reports in case the mod crashes in the future.
+*Fixed a crash with Random PSIdeas' Flash Ring.
+*Fixed memory returning null vetors.
+*Fixed the Modulus operator returning the first number.
+*[API] Fixed external references.
+r1.1-74
+*Fix spell entities triggering pressure plates.
+*Detonators now actually detonate in a sphere.
+*Psimetal tools and armor no longer break. Instead, they just stop working at 0 durability.
+*Psi tool regen is a lot faster, but is more exploitable in battle.
+*Fix volatile CAD data (time, vector memory, battery) disappearing occasionally.
+r1.1-73
+*Detonators now detonate in a sphere.
+*Entire spells can now be rotated and mirrored with a single keybind. Glorious!
+*Infusion tricks now can infuse all of the materials up to their tier. Ebony and Ivory is slightly more expensive to accommodate this.
+*Search is now sorted by relevance, instead of just by what order things are registered in.
+*Infusion tricks now act in a sphere, instead of a cube.
+*Fix odd motion behavior when adding motion to a player or an entity a player is controlling.
+*Blink tricks now preserve momentum.
+*Fix a crash when particles were size zero.
+*[API] Capabilities are now the method by which ISocketable, IShowPsiBar, ISpellSettable, ISpellContainer, and ISpellImmune are handled.
+*[API] Added PsiRegenEvent
+r1.1-72
+*Added some hooks for addons to do stuff. (WireSegal)
+*Added some more checks to prevent desync. (WireSegal)
+*Allow crafting Psidust with any oredicted redstone dust. (WireSegal)
+*Fixed crashing with Magical Psi. You'll need an updated Magical Psi version too. (WireSegal)
+r1.1-71
+*Added a special case regarding batteries that have -1 overflow (WireSegal)
+*CADs can no longer be used as literal pickaxes (Laike-Endaril)
+*Cleaned up unnecessary remote checks (WireSegal)
+*Fixed a bug regarding loopcasting visuals (WireSegal)
+*Fixed a bug regarding the loopcast sync packet only working on the client's side (WireSegal)
+*Fixed eidos being "jittery" and causing "wrong movement issues" (WireSegal)
+*Loopcasts now end even when switching between identical bullets (WireSegal)
+*Removed unnecessary colour allocations (WireSegal)
+*Restricted spell casting to serverside only. (WireSegal)
+*Trick: Break Block now accounts for many more edge cases regarding the mining level (Laike-Endaril)
+*[API] Added generic redirection
+*[API] Move saved vectors to CAD data instead of Player data (WireSegal)
+r1.1-70
+*Fixed a crash that would happen sometimes when a player would delay a spell. (WireSegal) 
+*Fixed the tutorial not working prperly again, hopefully. (WireSegal)
+r1.1-69
+*Nice.
+*Added new commands: /psi-learn and /psi-unlearn (WireSegal)
+*Changed CAD logic a bit to allow addon components to have negative values. (WireSegal)
+*Fixed a generic crash. (WireSegal)
+*Fixed the tutorial not giving you level points properly. (WireSegal)
+*Made the mapping for the missing conjured block be ignored. (WireSegal)
+r1.1-68
+*Fixed a crash on world load. (WireSegal)
+*Fixed a crash with Terraqueous. (WireSegal)
+*Fixed tutorial data not loading prperly. Players who were missing points will get them back. (WireSegal)
+*Optimized the spell circle render. (WireSegal)
+*[API] Allow items other than CADs to loopcast. (WireSegal)
+r1.1-67
+*Fixed a crash with lack of presistent data files. (WireSegal)
+*Fixed particles being larger than intended. (WireSegal)
+r1.1-66
+*Fixed a startup crash. (WireSegal)
+r1.1-65
+*Overhaul the internals of the CAD Assembler to not be 1.8 era garbagio. (WireSegal)
+*Fix CAD items desynchronizing. (WireSegal)
+*Fix the wrong break stats being used when you're not holding the item casting the spell. (WireSegal)
+*Fix *the* CME, an issue which has been affecting addon developers since the beginning of Psi. (WireSegal)
+*Allow any End dimension to craft ebony and ivory. (WireSegal)
+*Optimize conjured blocks extremely. (WireSegal)
+*Fix some stray shadows in piece textures. (WireSegal)
+*[API] Added AssembleCADEvent. (WireSegal)
+*[API] Added IShowPsiBar. (WireSegal)
+*[API] Fix Kamefrede's changes referencing non-API code from the API package. (WireSegal)
+*[API] Added CADStatEvent. (WireSegal)
+r1.1-64
+*Fixed Bright Psimetal Plates not being localized. (Kamefrede)
+*Fixed Operator: Entity Motion returning the wrong magnitude for players. (Kamefrede)
+*Fixed some blocks not having creative tabs. (Kamefrede)
+*[API] Added CADTakeEvent and PostCADCraftEvent. (Kamefrede)
+*[API] Changed how ISocketable accepts bullets. (Kamefrede)
+r1.1-63
+*Fixed spells not casting because WireSegal did a dumb. (SanAndreasP)
+r1.1-62
+*Fixed boot spells not working on servers. (WireSegal)
+*[API] Added an event for before a spell is cast so addons can do cool things with it. (WireSegal)
+r1.1-61
+*Fixed a random client crash with the camera not being set properly or something like that. It's fixed. (Kamefrede)
+r1.1-60
+*Added further reprecautions to overflowing your psi. If you do so, you can only cast spells once you're back to full.
+*Added the ability to pick which spell piece to be placed into the grid with ENTER by using TAB.
+*Fixed a crash that I honestly have no idea what it was caused by but it's fixed.
+*Fixed a crash when a projectile collides with invalid context. (Terrana)
+*Fixed a crash when loading a void world.
+*Fixed a crash when pointing Constant: Wrapper towards itself with a connector.
+*Fixed a crash when using Selector: Eidos Changelog with an input value of 0.
+*Fixed blocks connecting to conjured lights.
+*Fixed both smelt tricks deleting items and blocks.
+*Fixed conjured lights having the wrong bounding box. (juliand665)
+*Fixed loopcasting having incorrect delay on the first to second cast.
+*Fixed psimetal boot spells not having a proper server side component sometimes.
+*Fixed psimetal tools not having proper tool clases.
+*Fixed Selector: Block Presence never returning 1.
+*Fixed some typos. (sjaak31367, mwnDK1402)
+*Fixed spell bullets and CADs not showing up in creative search.
+*Fixed the psi keybind triggering in chat.
+*Fixed the reddit uploader having the new URL that doesn't support text insertion.
+*Fixed the spell detonator and a few other things not working in all directions.
+*Fixed Trick: Add Motion not working on other players.
+*Fixed Trick: Move Block not passing out a break block event (mcenderdragon)
+*Made Spell Circles immune to spells so you can't blink them around you dumb.
+*Removed the ability to Blink other players.
+*Removed the tie between level and psi amount, everyone now has 5000 psi.
+*The CAD will now go on a short cooldown after its spell is changed by right clicking on a programmer to prevent it from triggering the spell.
+*Trick: Torrent no longer places water 1 block under it.
+*Using Selector: Loopcast Index on spells being cast from armor will now return the amount of times the armor piece has cast that spell.
+*[API] Added SpellCastEvent.
+*[API] Added the ability for addons to write custom info to player data.
+*[API] Increased version number to 7.
+r1.1-59
+*Added a config option to make wiiv's Magical Psi be client side only.
+*More texture changes.
+r1.1-58
+*Fixed crashing on servers.
+r1.1-57
+*Added more stuff for wiiv's Magical Psi to work.
+r1.1-56
+*Fixed some more player data based crashes.
+r1.1-55
+*Changed more textures!
+*Fixed particles being squares because they had a missing texture. (Infinoid)
+r1.1-54
+*Added support for a thing that will be coming soon so don't worry about it.
+*Disabled the version checker.
+*Fixed the spell detonator's name being lower case.
+*Tweaked a bunch of textures around the place.
+r1.1-53
+*Fixed a major item dupe with block placing spells.
+*Fixed the psimetal boots model being a bit offset.
+*The leveling GUI now stores the scroll posiitons of the group list and text field.
+r1.1-52
+*Fixed importing breaking on some spells.
+*Improved the error message when an import fails by saying where it failed.
+r1.1-51
+*Fixed a crash when using block placing tricks.
+*Fixed a dupe bug with block breaking tricks and blocks whose drops are derived from Tile Entities.
+*Fixed a logic flaw with Operator: Max (Tekner)
+*Fixed backwards compatibility with pre 1.12 spell strings.
+*Fixed Selector: Nearby Smeltables not selecting only smeltables. (anexusarchon)
+r1.1-50
+*Updated to the latest forge and autoreglib.
+*Fixed the CAD assembler not showing the background and tooltips properly.
+r1.1-49
+*Fixed psi items showing up in vanilla tabs.
+r1.1-48
+*<b>Updated the mod to Minecraft 1.12.</b>
+r1.1-47
+*Incomplete spell groups are now shown in yellow instead of green. Don't be like old Vazkii, don't design terrible UX kids.
+*Fixed saved vectors not saving decimal points.
+*Fixed smelt block destroying blocks that don't have a block smelting recipe.
+r1.1-46
+*Bunch of text fixes and language updates. (Various)
+*Fixed Break Block not working in survivalm and maybe even crashing your game sometimes.
+*Fixed Grenades not RenderSystem their time correctly. (Ninetailed)
+r1.1-45
+*Fixed loopcast not working.
+r1.1-44
+*Fixed a CAD crash because of Scala, for the 10 millionth time.
+r1.1-43
+*<b>Updated the mod to Minecraft 1.11.2.</b>
+r1.0-42
+*Complex mod blocks are now harvested properly and will drop their proper drops. 
+r1.0-41
+*Added a config option to disable the version checker. I have no idea why it wasn't there yet but I'm a dumb and apparently forgot to include it.
+*Fixed not being able to start psi due to it forcing you onto the load data menu without any data to load. 
+r1.0-40
+*CADs now handle block harvest tools and levels properly.
+*Pressing the X button when loading your old world data will no longer prevent you from loading your data for the rest of the session.
+*You can now load your Psi data from an old world after you make your first psidust. 
+r1.0-39
+*Fixed the ARL dependency being in the wrong order, causing items to not load their models in some cases.
+r1.0-38
+*<b>Removed core systems and moved them to AutoRegLib, which is now a dependency.</b>
+*Block interaction tricks now check against world spawn protection to prevent it from being broken.
+*Fixed a crash with projectile bullets.
+*Fixed a mistake in the relative focus section.
+*Fixed CAD harvest level not being checked properly.
+*The explode trick now has a lower bound on cost and potency.
+r1.0-37
+*Fixed a crash with newer versions of Forge
+r1.0-36
+*<b>Updated the mod to Minecraft 1.10.</b>
+r1.0-35
+*<b>Out of beta! FeelsGoodMan.</b>
+*Added an offhand slot to the CAD Assembler.
+*Trick: Collapse Block used on lit redstone ore will have normal redstone ore drop so you get the drops properly.
+beta-34
+*Eidos spells now reset if you change dimensions.
+*Fixed a crash with chisels and bits. (AlgorithmX2)
+*Fixed armor rendering on armor stands.
+*Fixed desyncs with the spell programmer visuals and conjured blocks.
+*Fixed sounds not working if you're on a server.
+*Fixed the scrolling panes in the leveling GUI not working with the scroll wheel.
+beta-33
+*Fixed Spell Bullets not being settable.
+beta-32
+*<b>Updated the mod to Minecraft 1.9.4.</b>
+*Added a context sensitive bar config, which hides the Psi bar if it's full and the player is not holding an item that uses Psi.
+*Changed the Programmer Help icon to one that fits better with the interface.
+*Fixed a crash when cleaning up player data.
+*Fixed a dupe with some some blocks (like skulls and potentially other metadata related blocks like botania flowers) and block breaking tricks.
+*Fixed block breaking tricks breaking forge fluid blocks.
+*Fixed Fireballs not being considered as projectiles for the purposes of the Nearby Projectiles selector.
+*Fixed the level up HUD crashing the game if you have the keybind set to a mouse button. Also added support for displaying forge keybind modifiers.
+*Fixed the Psimetal shovel not being able to make path blocks.
+*Fixed the the Entity Motion selector being broken for players by making Entity Motion now use the eidos changelog 2 ticks ago rather than 1.
+*Fixed the Y coordinate shift of the Entity Position operator not being documented.
+*You now need to hold shift to set a CAD's spells by right clicking a programmer.
+beta-31
+*Updated for Forge 1826. It's now a requirement.
+*Fixed translucent hands in first person.
+*Fixed a typo. You probably didn't even notice it. It took me 5 minutes to find it when the guy sent me the phrase it was in.
+beta-30
+*Fixed psimetal tools having higher attack values than they should.
+*Sounds are back!
+beta-29
+*Fixed the whole mod being broken, because of Forge 12.16.0.1809.
+*Fixed loopcast being broken, because of 1.9.
+*Fixed the CAD Assembler armor slots being broken, because of 1.9.
+*Fixed Trick: Collapse being broken, because of 1.9.
+*Sounds are still broken, because of 1.9.
+beta-28
+*Fixed crash on leveling up.
+beta-27
+*Fixed backwards CADs in the newest forge.
+beta-26
+*Fixed the crash I tried to fix in 25 but actually didn't fix it. Let's hope the changelog for 27 isn't a copy of this one, it only happens after the mod is built.
+beta-25
+*Fixed a crash when using Psi items because SpecialSource hates lambdas.
+beta-24
+*<b>Updated the mod to Minecraft 1.9</b>
+*Added support for the two handed system to the Psi master keybind.
+*Sounds are missing because forge doesn't support them yet.
+*Tweaked the CAD renders to work with the two handed system.
+beta-23
+*Fixed invalid number constants being available through the import feature.
+*Fixed loopcast spells being able to be cast via right click while a loopcast is already going on.
+*Trick: Explode will no longer break blocks if the explosion is in a liquid.
+beta-22
+*Fixed a crash with the Round, Floor, and Ceiling operators.
+*Fixed Selector: Time missing ticks and having some in double. It now uses an internal clock in the CAD instead of the world time to prevent this.
+*Fixed the coordinate display in the Programmer GUI being off if the GUI is in spectator mode.
+*Fixed the Psi energy bar messing with your gui scale, for real this time.
+beta-21
+*Fixed a crash when adding comments to pieces if Scala isn't present.
+*Fixed an edge case with the Psi bar's auto rescaling modifying the game's gui scale? Maybe? I couldn't reproduce it.
+beta-20
+*A Vector Ruler without a defined vector with both source and destination will now convert the coordinates of the source into a vector instead of returning (0, 0, 0).
+*Added a coordinate indicator to the Programmer GUI.
+*Added a recipe to swap a CAD's colorizer by crafting it with the CAD. (yrsegal)
+*Added a Secondary Operators group. The group includes: Square, Cube, Power, Square Root, Logarithm, Ceiling, Floor, Round and Constant: e.
+*Added armor slots to the CAD Assembler.
+*Added Detection & Dynamism pieces. Selectors for a block's existance or solidity, and the amount of items in an inventory stack. Also a trick to change which slot is used by block placing tricks.
+*Added keybinds to upload a screenshot of a spell to imgur (Ctrl-Shift-Alt-G) and to share it on reddit (Ctrl-Shift-Alt-R).
+*Added Memory Management pieces that allow for spells to store presistant data in the CAD.
+*Added Selector: Eidos Changelog, which lets you get the position the caster was X ticks ago.
+*Added the ability to add comments to spell pieces by using Ctrl-D.
+*Added the ability to view a spell piece's tooltip without hovering over it by using Alt.
+*Bosses are now immune to spells.
+*Buffed the stats of T2 and T3 CAD Cores.
+*Fixed spell stats being able to be overflowed twice to create ridiculously powerful spells that cost virtually nothing.
+*Fixed the Programmer GUI not registering keys being held down (like backspace). (yrsegal)
+*Fixed the Psi bar spazzing out if you have a spell in your exosuit leggings.
+*Fixed tools not being able to break some things they should. (yrsegal)
+*Fixed Trick: Smelt Item being able to dupe items if multiple are used in one cast. (yrsegal)
+*Increased level cap to 28. The player's Psi energy is still capped at 5000, so there's a "soft cap" of 25. When you reach that level you get a message telling you about it.
+*Made Add Motion a bit more expensive, because people keep finding exploits with it.
+*Moved Min/Max operators to the new Secondary Operators group.
+*Optimized spell JSON output. Exported spell JSON is now a lot smaller. Old ones will still work, but the new format won't work on older versions. (<a href="https://puu.sh/nzExG/8d13fd1330.txt">comparison</a>)
+*Runtime spell errors now come with information on where the error happened in the spell.
+*Trick: Add Motion now needs to propel you upwards to negate fall damage again. Basically the same as before.
+beta-19
+*Added a help tooltip to the Spell Programmer GUI.
+*Adding a Trick to the Spell Programmer while the spell has no name defaults the spell's name to the name of the trick.
+*Fixed a crash when using Constant: Wrapper and the constant value is 0.
+*Fixed Exosuit Leggings not working with Selector: Entity Motion.
+*Fixed Operator: Vector Multiply not having a proper description.
+*Fixed setting conjured blocks overriding values from conjured blocks already placed. 
+*Fixed the Exosuit Light Sensor not taking sky light in mind properly.
+*Fixed the Spell Programmer GUI not closing if you die or get too far.
+*Spell Circles now maintain the look vector of the caster when they cast the spell.
+*Trick: Add Motion is now limited to one call per axis to prevent cost calculation problems.
+*Trick: Add Motion now always disables fall damage if the Y value is positive.
+beta-18
+*Place block tricks now respect custom item block handlers, like Botania flowers.
+*Fixed a crash when using Selector: Focused Entity on non-normal bullets.
+beta-17
+*Changed the Vector Ruler icon a bit.
+*Fixed Backspace deleting a piece instead of the name if the name field is selected.
+*Fixed the Light sensor not working on the surface.
+*Fixed Trick: Blink being able to put you into the ground if you use a negative distance value.
+beta-16
+*Added "Selector: Nearby Smeltables" to Smeltery.
+*Added the ability search for "_(name)" or "(name)_" on the Spell Programmer to find pieces that end with or begin with the name, respectively.
+*Added the Vector Ruler and "Selector: Ruler Vector", it allows you to define vectors in world. Check out the new (last) paragraph of Alternative Casting, because I couldn't find a better place to sneak it in.
+*Fixed a crash if you go below Y=0 or above Y=255.
+*Fixed Block Conjuration tricks using seconds instead of ticks.
+*Fixed Trick: Move Block being able to move Bedrock.
+*Fixed Trick: Smelt Item eating up items.
+*Rebalanced the stats for Trick: Smelt Item.
+*The Backspace key can now be used instead of the Delete key on the Spell Programmer.
+*The piece you have selected in the programmer GUI will now show up at the top.
+*Tweaked icons, again.
+*Tweaked the "you can only have one CAD" message.
+beta-15
+*Added an indicator to the tooltip of any spell pieces added by potential addons.
+*Added Block Conjuration tricks: Conjure Block, Conjure Light, Conjure Block Sequence.
+*Added Flow Control pieces: Sleep, Die, Evaluate, Sneak Status and Constant Wrapper. Also includes Min/Max operators.
+*Added Operator: Focused Entity, which lets you get the entity an entity is looking at.
+*Added Smeltery tricks: Smelt Item and Smelt Block.
+*Added the Psimetal Exosuit armorset, Exosuit Controller, Exosuit Sensors and the Exosuit Casting group.
+*Added Trignometry operators, Pi, and Dot Product.
+*Added two new spell bullets: Charge and Mine. Added a Spell Detonator item for the Charge Bullet.
+*Capped the amount of Psi you can have to 5000. If you go above level 25 you'll still have 5000. Furthermore the maximum regen you can have is 25 Psi per tick.
+*Fixed Break Block tricks breaking liquids.
+*Fixed Constant: Number pieces crashing the game if a spell is imported with invalid json.
+*Fixed Eidos spells messing up if you die in the middle of their execution.
+*Fixed null entities sometimes getting picked up by selectors somehow and crashing the game. I think.
+*Fixed setting the Psi Master keybind to a mouse button crashing the game in the bullet selection radial menu.
+*Fixed tools desyncing on levelup.
+*Fixed Trick: Torrent being able to place water in the nether.
+*Fixed tricks that place blocks not updating the inventory stacks properly in the client.
+*Fixed white lines in the CAD models.
+*Improved UX for the Spell Programmer:<ul>	<li>Ctrl+arrow keys shifts the spell around.</li><li>Ctrl-C, Ctrl-X and Ctrl-V work as Copy/Cut/Paste.</li><li>Ctrl-Z and Ctrl-Y work as Undo/Redo.</li><li>Enter can now open the piece selection panel. If you're in the selection panel and have only one visible piece (because of searching), you can use Enter to put it in the board.</li><li>If you have the piece selection panel open, you can use Esc to close it instead of closing the whole interface.</li><li>Number keys + arrow keys let you change the values of spell parameters using your keyboard. Double tap the same key to disable a parameter (if available).</li><li>Searching for a number in the piece selection panel allows you to place the respective Constant: Number piece directly from there.</li><li>Spell name field is no longer force selected (no more v spam for direwolf :<).</li><li>Tab changes your cursor between the text box and the spell grid.</li><li>The arrow keys can be used to change the selected position.</li><li>You can search for "in:(type)" or "out:(type)" to get pieces that take a specific data type as input or have it as output.</li><li><i>(If you're on Mac, use Cmd instead of Ctrl).</i></li></ul>
+*Loopcast and Circle Spell Bullets can no longer be put on anything that isn't a CAD.
+*Made Trick: Strength more expensive. Same curve as Regeneration and Resistance.
+*Moved Eidos Manipulation to level 24 to accomodate Exosuit Casting.
+*Projectiles now remember the context of when they were created (by a tool), so pieces like Selector: Block Broken will work on non Normal bullets.
+*Psimetal tools now only regen if you're above 50% Psi. 
+*Raised level cap to 25.
+*Removed the "Psi Beta | Not Final" indicator from GUIs. The mod is still beta, but this doesn't need to be there any more as it's not as early.
+*Rewrote Alternative Casting a bit to accomodate for the new bullets.
+*Selector: Attack Target now also works with Projectile Spell Bullets and returns the entity the projectile collided against.
+*The parameters for Operator: Vector Construct are now all optional. Any non set values default to 0.
+*Tools can also be right clicked on a Spell Programmer to set the bullet in them, similarly to a CAD.
+*Tweaked more spell piece icons.
+*Tweaked the texture for the Introduction GUI.
+*When you select an item with Spell Bullets, the type of bullet is now displayed above the name alongside with the spell's name.
+*You can now move, sprint, sneak and jump while in the bullet selection radial menu.
+beta-14
+*Added the update system from Botania. Puns included!
+*Fixed a dupe when cloning Spell Bullets into Spell Drives.
+*Fixed Eidos Anchor ignoring your look.
+*Fixed Eidos spells not working when the player is mounted.
+*Fixed the Black CAD colorizer having no recipe.
+*Fixed Trick: Add Motion being weird with negative directions.
+*Rebalanced the cost of Trick: Add Motion. 
+*Right clicking a CAD onto a Spell Programmer sets the spell in the current selected bullet to be the spell in the programmer.
+*Trick: Blink no longer works downwards so it can't push you into blocks at your level if you look just slightly downwards.
+beta-13
+*Fixed a crash with Operator: Closest to Point.
+*Fixed a crash with Psimetal tools when using break block tricks.
+*Fixed a Spell Bullet dupe by placing a tool in the slot of the CAD when the CAD has bullets.
+*Fixed player data not saving after a piece group is selected and only when it's fulfilled and the player levels up.
+*Fixed Selector: Block Broken not working if the player is standing at the maximum range that they can break blocks.
+*Fixed the error for two parameters sharing a side not being localized properly.
+*Fixed the Psimetal Sword not regenerating with Psi.
+*Fixed Trick: Place Block placing blocks on the client when it shouldn't.
+*Psi material storage blocks are now registered in the Ore Dictionary. (VapourDrive)
+*Psionic Overflow now deals 5x less damage.
+*Spells in Spell Bullets can now be copied onto Spell Drives.
+*The "Spell is Unnamed" error now has the lowest priority rather than the second highest.
+*The Psi bar now scales down to a non crazy value if your scale factor is too high. There's a config for this.
+*Trick: Add Motion now negates fall damage if the resulting motion is positive. Furthermore, multiple casts of Trick: Add Motion can not be stacked to create ridiculous speeds.
+beta-12
+*Fixed a crash in the Programmer GUI.
+*Fixed a crash when casting a spell.
+*Fixed a crash when firing a Projectile bullet through a portal. (Thog)
+*Fixed the creative CAD not having its colorizer piece tinted
+*If you have multiple CADs you now get a chat message alerting you you're messing up.
+*Operator: Entity Motion now tries to approximate player motion from the player's position, since client input doesn't reflect on the motion values.
+*Spell stats can no longer be overloaded to make the cost and potency negative.
+*Trick: Debug's Number parameter now takes a Number rather than a Number Constant.
+*Using /give to give yourself a CAD will no longer crash the game.
+beta-11
+*Added models and icons for the remaining CADs.
+*Changed the color of the signs in the radial menu.
+*Fixed projectiles/spell circles fired by CADs with colorizers crashing servers.
+*Tweaked some piece icons.
+beta-10
+*Addded Positive Effects and Negative Effects as new groups containing a bunch of Tricks.
+*Added Eidos spells, Eidos Reversal and Eidos Anchor.
+*Added Grenade Spell Bullets and changed the recipe for Circle Spell Bullets to fit them.
+*Added Operators to Add/Remove an entity to/from a list to Entities 101.
+*CADs now detect fake players and refuse to work on them.
+*Changed the projectile spell bullet's "Time Alive" value to be persistent and synced.
+*Fixed parameter arrows not rendering properly when a piece has errored.
+*Improved Psimetal tool regeneration to not be synced with world time and only work when the tool isn't equipped.
+*Made Trick: Explode a bit (lot) more expensive.
+*Tweaked some text in Numbers 101 to be more obvious.
+*Updated the model for the Gold CAD. More models coming soon(tm).
+beta-9
+*Addded spectator mode to the Spell Programmer.
+*Added a "Spell is Unnamed" compilation error. Previously trying to put an unnamed spell into a bullet would just not do anything.
+*Added a Random integer operator.
+*Added Elemental Arts with 4 tricks.
+*Added Greater Infusion and Ebony&Ivory. T3 CAD components are now craftable.
+*Added Selector: Nearby Projectiles to Entities 101.
+*Added Tool Casting and a Psimetal toolset to use with it.
+*Fixed a crash with Trick: Blink on an entity that techncailly doesn't have a look vector.
+*Fixed compressed blocks making 1 item instead of 9 when de-compressed.
+*Fixed Spell Bullets not being able to set a spell from a programmer being used by someone else.
+*Fixed the Infinite Loop error not showing up properly.
+*Fixed the Introduction skip menu not being skippable (yes, ironic).
+*Fixed the player's CAD rendering wrong in the programmer GUI.
+*Fixed the Programmer render crash. Again. I think. Maybe. Hopefully.
+*Fixed the programmer's Import button not setting the spell's name.
+*Fixed the Psi bar not showing up in creative if you have level 0.
+*Fixed tooltips going offscreen on larger gui scales.
+*Selector: Nearby Living now also picks up players.
+*The cost and power for Trick: Add Motion is now exponential.
+beta-8
+*Fixed a crash when saving player data if an invalid spell group gets registered somehow. (for real this time >_>)
+*Fixed a crash when someone else in a server breaks a programmer in creative. (for real this time >_>)
+*Fixed the Psidust Block texture not rendering.
+*Replaced the Golden CAD Colorizer (uncraftable) with a Psi CAD Colorizer, with a recipe!
+beta-7
+*Added a persistency system, where, in survival worlds, the player's highest level is registered, and they can revert back to it on a new world.
+*Added models for CADs. Textures are WIP.
+*CADs built only with an Assembly can now be scavenged by placing them in the crafting grid.
+*Loopcast spell circles now reflect the color of the player's CAD.
+*Fixed a crash when saving player data if an invalid spell group gets registered somehow.
+*Fixed a crash when someone else in a server breaks a programmer in creative.
+*Fixed a spell circle appearing under the player for a tiny bit after they change bullet socket.
+*Tweaked some icons.
+beta-6
+*Added a note to the first tutorial telling you that you can only have 1 CAD.
+*Added Import/Export (to/from clipboard) to the Programmer GUI.
+*Cyan plates are cyaner.
+*Fixed a (client-side) crash on multiplayer if another player casts a projectile or circle spell)
+*Fixed a desync where if a player dies, their information, in the client side only, is reset.
+*Fixed desyncs because I messed the coordinate check in the packet dispatcher :V
+*Fixed loopcasting not working on servers.
+*Increased Simple CAD Core's Complexity to 10 (from 6).
+*Operator: Closest to Point and Operator: Random Entity now throw a spell error if there's no valid targets instead of crashing the game \:D/
+*Spell search bar in spell programmers now clears when you re-open the piece selection panel.
+*Vector Construct is now the red piece of Vectors 101, rather than Vector Cross Product.
+beta-5
+*Fixed Error Suppressors crashing the game if put next to something that takes a parameter.
+beta-4
+*Added a display for remaining blocks straight out of Botania.
+*Added an Error Suppressor piece. It does what you expect.
+*Added Block Movement tricks: Move Block, Collapse Block
+*Added Circle bullets for Spell Circle type magic.
+*Added Creative CAD Assembly with infinity Potency and Efficiency.
+*Added decorative blocks so you can create your own lab!
+*Added Entity Movement tricks: Blink, Mass Blink, Mass Exodus, Mass Add Motion.
+*Added Integer operator tricks: Integer Division, Modulus.
+*Added Loopcast Bullets and relevant pieces (Selector: Loopcast Index)
+*Added Spell Drives, means of copying and transporting spells.
+*Bullets can now have cost multipliers.
+*Improved bullet tooltips with type and cost multiplier.
+*Improved the Level Up indicator to no longer be a dumb chat message.
+*Improved the radial selector so it shows what type of bullet a spell is.
+*The programming GUI now closes if the programmer is broken.
+*Tricks that place blocks no longer remove them from your inventory in creative.
+*Tweaked some icons.
+beta-3
+*Removed lambda to hopefully fix the problem beta-2 was supposed to fix.
+beta-2
+*Removed F in shaders becase screw AMD.
+*Recompiled to hopefully fix a problem caused by a ForgeGradle bug that made lambas mess up.
+beta-1
+*First Release
