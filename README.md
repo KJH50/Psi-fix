@@ -8,3 +8,5 @@ This mod requires [Patchouli](https://github.com/Vazkii/Patchouli).
 Psi is licensed under the [Psi License](http://psi.vazkii.net/license.php)
 
 代码由ai完成
+
+修复版本为105
