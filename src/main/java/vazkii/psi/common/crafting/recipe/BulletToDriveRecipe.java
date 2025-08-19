@@ -21,6 +21,7 @@ import vazkii.psi.api.spell.ISpellAcceptor;
 import vazkii.psi.api.spell.Spell;
 import vazkii.psi.common.crafting.ModCraftingRecipes;
 import vazkii.psi.common.item.ItemSpellDrive;
+import vazkii.psi.common.item.base.ModDataComponents;
 
 public class BulletToDriveRecipe extends CustomRecipe {
 	public BulletToDriveRecipe(CraftingBookCategory craftingBookCategory) {
@@ -40,7 +41,7 @@ public class BulletToDriveRecipe extends CustomRecipe {
 						return false;
 					}
 					foundTarget = true;
-				} else if(stack.getItem() instanceof ItemSpellDrive && ItemSpellDrive.getSpell(stack) == null) {
+				} else if(stack.getItem() instanceof ItemSpellDrive && !stack.has(ModDataComponents.SPELL)) {
 					if(foundSource) {
 						return false;
 					}

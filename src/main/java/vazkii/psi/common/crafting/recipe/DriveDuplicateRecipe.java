@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import vazkii.psi.api.spell.Spell;
 import vazkii.psi.common.crafting.ModCraftingRecipes;
 import vazkii.psi.common.item.ItemSpellDrive;
+import vazkii.psi.common.item.base.ModDataComponents;
 
 public class DriveDuplicateRecipe extends CustomRecipe {
 	public DriveDuplicateRecipe(CraftingBookCategory category) {
@@ -35,7 +36,7 @@ public class DriveDuplicateRecipe extends CustomRecipe {
 			ItemStack stack = inv.getItem(i);
 			if(!stack.isEmpty()) {
 				if(stack.getItem() instanceof ItemSpellDrive) {
-					if(ItemSpellDrive.getSpell(stack) == null) {
+					if(!stack.has(ModDataComponents.SPELL)) {
 						if(foundTarget) {
 							return false;
 						}
@@ -64,9 +65,8 @@ public class DriveDuplicateRecipe extends CustomRecipe {
 		for(int i = 0; i < inv.size(); i++) {
 			ItemStack stack = inv.getItem(i);
 			if(!stack.isEmpty()) {
-				Spell spell = ItemSpellDrive.getSpell(stack);
-				if(spell != null) {
-					source = spell;
+				if(stack.has(ModDataComponents.SPELL)) {
+					source = ItemSpellDrive.getSpell(stack);
 				} else {
 					target = stack;
 				}
@@ -84,7 +84,7 @@ public class DriveDuplicateRecipe extends CustomRecipe {
 
 		for(int i = 0; i < list.size(); ++i) {
 			ItemStack item = inv.getItem(i);
-			if(!item.isEmpty() && ItemSpellDrive.getSpell(item) != null) {
+			if(!item.isEmpty() && item.has(ModDataComponents.SPELL)) {
 				list.set(i, item.copy());
 				break;
 			}
