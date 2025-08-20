@@ -36,6 +36,9 @@ import vazkii.psi.common.block.tile.container.ContainerCADAssembler;
 import vazkii.psi.common.lib.LibBlockNames;
 import vazkii.psi.common.lib.LibMisc;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static vazkii.psi.common.item.base.ModItems.defaultBuilder;
 
 @EventBusSubscriber(modid = LibMisc.MOD_ID)
@@ -58,6 +61,22 @@ public class ModBlocks {
 	public static BlockEntityType<TileCADAssembler> cadAssemblerType;
 	public static BlockEntityType<TileProgrammer> programmerType;
 	public static BlockEntityType<TileConjured> conjuredType;
+
+	public static List<Block> getAllBlocks() {
+		return Arrays.asList(
+				cadAssembler,
+				programmer,
+				psidustBlock,
+				psimetalBlock,
+				psigemBlock,
+				psimetalPlateBlack,
+				psimetalPlateBlackLight,
+				psimetalPlateWhite,
+				psimetalPlateWhiteLight,
+				psimetalEbony,
+				psimetalIvory
+		);
+	}
 
 	@SubscribeEvent
 	public static void register(RegisterEvent evt) {

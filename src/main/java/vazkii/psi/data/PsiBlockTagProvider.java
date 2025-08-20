@@ -10,6 +10,7 @@ package vazkii.psi.data;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.tags.BlockTags;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -42,5 +43,19 @@ public class PsiBlockTagProvider extends BlockTagsProvider {
 		tag(Tags.Blocks.STORAGE_BLOCKS).add(ModBlocks.psigemBlock);
 		tag(Tags.Blocks.STORAGE_BLOCKS).add(ModBlocks.psimetalEbony);
 		tag(Tags.Blocks.STORAGE_BLOCKS).add(ModBlocks.psimetalIvory);
+
+		// 添加挖掘标签，使方块可以被镐子挖掘
+		tag(BlockTags.MINEABLE_WITH_PICKAXE)
+				.add(ModBlocks.cadAssembler)
+				.add(ModBlocks.programmer)
+				.add(ModBlocks.psidustBlock)
+				.add(ModBlocks.psimetalBlock)
+				.add(ModBlocks.psigemBlock)
+				.add(ModBlocks.psimetalPlateBlack)
+				.add(ModBlocks.psimetalPlateBlackLight)
+				.add(ModBlocks.psimetalPlateWhite)
+				.add(ModBlocks.psimetalPlateWhiteLight)
+				.add(ModBlocks.psimetalEbony)
+				.add(ModBlocks.psimetalIvory);
 	}
 }
