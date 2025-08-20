@@ -65,6 +65,7 @@ import vazkii.psi.common.core.handler.PlayerDataHandler.PlayerData;
 import vazkii.psi.common.core.handler.PsiSoundHandler;
 import vazkii.psi.common.core.handler.capability.CADData;
 import vazkii.psi.common.crafting.ModCraftingRecipes;
+import vazkii.psi.common.crafting.recipe.DimensionTrickRecipe;
 import vazkii.psi.common.item.base.ModDataComponents;
 import vazkii.psi.common.item.base.ModItems;
 import vazkii.psi.common.lib.LibPieceGroups;
@@ -452,8 +453,19 @@ public class ItemCAD extends Item implements ICAD {
 				predicate = r -> r.getPiece() == null;
 			}
 
+			// 检查普通配方类型
 			Optional<RecipeHolder<ITrickRecipe>> recipe = world.getRecipeManager().getRecipeFor(ModCraftingRecipes.TRICK_RECIPE_TYPE.get(), inv, world)
 					.filter(r -> predicate.test(r.value()));
+
+			// 如果普通配方没有匹配，则检查维度配方类型
+			if(!recipe.isPresent()) {
+				Optional<RecipeHolder<DimensionTrickRecipe>> dimensionRecipe = world.getRecipeManager().getRecipeFor(ModCraftingRecipes.DIMENSION_TRICK_RECIPE_TYPE.get(), inv, world)
+						.filter(r -> predicate.test(r.value()));
+				if(dimensionRecipe.isPresent()) {
+					recipe = Optional.of(new RecipeHolder<>(dimensionRecipe.get().id(), dimensionRecipe.get().value()));
+				}
+			}
+
 			if(recipe.isPresent()) {
 				ItemStack outCopy = recipe.get().value().getResultItem(RegistryAccess.EMPTY).copy();
 				int count = stack.getCount() * outCopy.getCount();
