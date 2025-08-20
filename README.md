@@ -10,3 +10,5 @@ Psi is licensed under the [Psi License](http://psi.vazkii.net/license.php)
 修复代码由ai完成
 
 修复版本为105
+
+原模组仓库地址:https://github.com/VazkiiMods/Psi
