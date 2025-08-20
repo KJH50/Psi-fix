@@ -48,7 +48,6 @@ public class PsiBlockTagProvider extends BlockTagsProvider {
 		tag(BlockTags.MINEABLE_WITH_PICKAXE)
 				.add(ModBlocks.cadAssembler)
 				.add(ModBlocks.programmer)
-				.add(ModBlocks.psidustBlock)
 				.add(ModBlocks.psimetalBlock)
 				.add(ModBlocks.psigemBlock)
 				.add(ModBlocks.psimetalPlateBlack)
@@ -57,5 +56,16 @@ public class PsiBlockTagProvider extends BlockTagsProvider {
 				.add(ModBlocks.psimetalPlateWhiteLight)
 				.add(ModBlocks.psimetalEbony)
 				.add(ModBlocks.psimetalIvory);
+
+		// 添加挖掘等级标签，使这些方块需要铁镐或更高级别工具才能挖掘掉落
+		tag(BlockTags.NEEDS_IRON_TOOL)
+				.add(ModBlocks.psigemBlock)
+				.add(ModBlocks.psimetalBlock)
+				.add(ModBlocks.psimetalEbony)
+				.add(ModBlocks.psimetalIvory);
+
+		// 添加挖掘标签，使psidust_block可以被铲子挖掘
+		tag(BlockTags.MINEABLE_WITH_SHOVEL)
+				.add(ModBlocks.psidustBlock);
 	}
 }

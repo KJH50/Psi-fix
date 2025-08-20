@@ -2,7 +2,6 @@
   "values": [
     "psi:cad_assembler",
     "psi:programmer",
-    "psi:psidust_block",
     "psi:psimetal_block",
     "psi:psigem_block",
     "psi:black_psimetal_plate",
