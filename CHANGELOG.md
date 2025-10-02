@@ -112,9 +112,6 @@ for(Map.Entry<BlockPos, BlockState> entry : toRemove.entrySet()) {
 
 ### 待办事项
 - [ ] 进一步优化性能（低优先级）
-- [ ] 添加单元测试（中优先级）
-- [ ] 文档完善（低优先级）
-
 ---
 
 ## 版本控制说明
@@ -123,10 +120,10 @@ for(Map.Entry<BlockPos, BlockState> entry : toRemove.entrySet()) {
 - 新功能增加次版本号
 - Bug修复增加修订版本号
 
-**当前版本**: 1.1.0  
-**下一个版本**: 1.2.0（计划添加单元测试）
+**当前版本**: 1.0.5.5  
+**下一个版本**: 1.0.5.6
 
 ---
 
 *最后更新: 2025-10-03 06:00 (UTC+8)*  
-*文档维护: AI Assistant*
+*文档维护: AI Assistant,KJH50*
