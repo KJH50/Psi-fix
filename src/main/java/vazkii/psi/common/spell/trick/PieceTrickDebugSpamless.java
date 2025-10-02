@@ -45,26 +45,41 @@ public class PieceTrickDebugSpamless extends PieceTrick {
 		Number numberVal = this.getParamValue(context, number);
 		Object targetVal = getParamValue(context, target);
 
-		Component component = Component.literal(String.valueOf(targetVal));
+		Component component = createBaseComponent(targetVal);
 		if(numberVal != null) {
-			String numStr = "" + numberVal;
-			if(numberVal.doubleValue() - numberVal.intValue() == 0) {
-				int numInt = numberVal.intValue();
-				numStr = "" + numInt;
-			}
-
-			component = Component.literal("[" + numStr + "]")
-					.setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA))
-					.append(Component.literal(" ")
-							.setStyle(Style.EMPTY.withColor(ChatFormatting.RESET)))
-					.append(component.plainCopy().setStyle(Style.EMPTY.withColor(ChatFormatting.RESET)));
+			component = createNumberedComponent(numberVal, component);
 		}
 
+		sendToPlayer(context, component, numberVal);
+		return null;
+	}
+
+	private Component createBaseComponent(Object targetVal) {
+		return Component.literal(String.valueOf(targetVal));
+	}
+
+	private Component createNumberedComponent(Number numberVal, Component baseComponent) {
+		String numStr = formatNumber(numberVal);
+
+		return Component.literal("[" + numStr + "]")
+				.setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA))
+				.append(Component.literal(" ")
+						.setStyle(Style.EMPTY.withColor(ChatFormatting.RESET)))
+				.append(baseComponent.plainCopy().setStyle(Style.EMPTY.withColor(ChatFormatting.RESET)));
+	}
+
+	private String formatNumber(Number numberVal) {
+		if(numberVal.doubleValue() - numberVal.intValue() == 0) {
+			return String.valueOf(numberVal.intValue());
+		}
+		return String.valueOf(numberVal);
+	}
+
+	private void sendToPlayer(SpellContext context, Component component, Number numberVal) {
 		if(context.caster instanceof ServerPlayer) {
-			MessageSpamlessChat chatMessage = new MessageSpamlessChat(component, numberVal == null ? -1 : numberVal.intValue());
+			int messageId = numberVal == null ? -1 : numberVal.intValue();
+			MessageSpamlessChat chatMessage = new MessageSpamlessChat(component, messageId);
 			MessageRegister.sendToPlayer((ServerPlayer) context.caster, chatMessage);
 		}
-
-		return null;
 	}
 }

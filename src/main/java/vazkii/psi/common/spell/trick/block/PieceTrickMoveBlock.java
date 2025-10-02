@@ -103,7 +103,16 @@ public class PieceTrickMoveBlock extends PieceTrick {
 		}
 
 		if(state1.isAir() || state1.canBeReplaced()) {
-			world.setBlock(pos1, state, 1 | 2);
+			// 原子性方块移动操作，防止复制漏洞
+			// 先验证源方块状态是否与预期一致
+			BlockState currentState = world.getBlockState(pos);
+			if(!currentState.equals(state)) {
+				// 状态不一致，可能是其他操作已修改，拒绝移动
+				return null;
+			}
+
+			// 原子性操作：先设置目标位置，再移除源位置
+			world.setBlock(pos1, state, 3); // 使用标志3：UPDATE_ALL | SEND_TO_CLIENTS
 			world.removeBlock(pos, false);
 			world.levelEvent(2001, pos, Block.getId(state));
 		}

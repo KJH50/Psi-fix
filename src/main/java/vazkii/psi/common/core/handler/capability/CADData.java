@@ -134,15 +134,17 @@ public class CADData implements ICapabilityProvider<ItemCapability<?, Void>, Voi
 
 	@Override
 	public ItemStack getBulletInSocket(int slot) {
-		if(isSocketSlotAvailable(slot))
+		if(isSocketSlotAvailable(slot)) {
 			return cadHandler.getStackInSlot(slot);
+		}
 		return ItemStack.EMPTY;
 	}
 
 	@Override
 	public void setBulletInSocket(int slot, ItemStack bullet) {
-		if(isSocketSlotAvailable(slot))
+		if(isSocketSlotAvailable(slot)) {
 			cadHandler.setStackInSlot(slot, bullet);
+		}
 	}
 
 	@Override

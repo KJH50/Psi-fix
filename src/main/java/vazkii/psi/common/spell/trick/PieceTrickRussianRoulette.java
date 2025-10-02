@@ -18,14 +18,18 @@ import vazkii.psi.api.spell.piece.PieceTrick;
 import vazkii.psi.common.core.handler.PlayerDataHandler;
 
 import java.util.Objects;
+import java.util.Random;
 
 public class PieceTrickRussianRoulette extends PieceTrick {
+
+	private static final Random RANDOM = new Random();
+
 	public PieceTrickRussianRoulette(Spell spell) {
 		super(spell);
 	}
 
 	public static int getRandomSocketableSlot(ISocketable socketable) {
-		return (int) ((Math.random() * (socketable.getLastSlot() + 1)));
+		return RANDOM.nextInt(socketable.getLastSlot() + 1);
 	}
 
 	@Override

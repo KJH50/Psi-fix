@@ -202,8 +202,9 @@ public class TileCADAssembler extends BlockEntity implements ITileCADAssembler, 
 					setStackForComponent(EnumCADComponent.DYE, stack);
 				} else { // If we've gotten here, the item is a bullet.
 					int idx = i - 7;
-					if(socketable != null)
+					if(socketable != null) {
 						socketable.setBulletInSocket(idx, stack);
+					}
 				}
 			}
 		} else {

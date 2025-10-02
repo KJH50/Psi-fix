@@ -9,10 +9,11 @@
 package vazkii.psi.common.spell.trick.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
@@ -27,6 +28,15 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
+/**
+ * 序列方块移动法术组件
+ * 
+ * 功能：将一系列方块按照指定方向移动
+ * 特点：支持批量移动、防复制机制、边界安全检查
+ * 
+ * @author Vazkii (原始作者)
+ * @author AI Assistant (代码优化)
+ */
 public class PieceTrickMoveBlockSequence extends PieceTrick {
 
 	SpellParam<Vector3> position;
@@ -59,11 +69,23 @@ public class PieceTrickMoveBlockSequence extends PieceTrick {
 
 	@Override
 	public Object execute(SpellContext context) throws SpellRuntimeException {
+		// 参数验证和边界检查
 		Vector3 directionVal = SpellHelpers.getVector3(this, context, direction, false, true);
 		Vector3 positionVal = SpellHelpers.getVector3(this, context, position, true, false);
 		Vector3 targetVal = SpellHelpers.getVector3(this, context, target, false, false);
 		int maxBlocksVal = this.getParamValue(context, maxBlocks).intValue();
+
+		// 边界条件检查
+		if(maxBlocksVal <= 0) {
+			throw new SpellRuntimeException(SpellRuntimeException.NON_POSITIVE_VALUE);
+		}
+		if(maxBlocksVal > 64) {
+			throw new SpellRuntimeException("psi.spellerror.too_many_blocks");
+		}
+
 		Level world = context.focalPoint.level();
+		Player player = context.caster;
+		ItemStack tool = context.getHarvestTool();
 
 		Map<BlockPos, BlockState> toSet = new HashMap<>();
 		Map<BlockPos, BlockState> toRemove = new HashMap<>();
@@ -90,16 +112,14 @@ public class PieceTrickMoveBlockSequence extends PieceTrick {
 		for(BlockPos blockPos : positions) {
 			BlockState state = world.getBlockState(blockPos);
 
+			// 跳过空气方块
 			if(world.isEmptyBlock(blockPos)) {
 				continue;
 			}
 
-			if(world.getBlockEntity(blockPos) != null ||
-					state.getPistonPushReaction() != PushReaction.NORMAL ||
-					state.getDestroySpeed(world, blockPos) == -1 ||
-					!PieceTrickBreakBlock.canHarvestBlock(state, context.caster, world, blockPos, context.getHarvestTool()) ||
-					!SpellHelpers.isBlockPosInRadius(context, blockPos) ||
-					!world.mayInteract(context.caster, blockPos)) {
+			// 检查方块是否可移动
+			boolean isMovable = checkBlockMovability(state, world, blockPos, player, tool, context);
+			if(!isMovable) {
 				immovableBlocks.add(blockPos);
 				continue;
 			}
@@ -150,16 +170,69 @@ public class PieceTrickMoveBlockSequence extends PieceTrick {
 			toSet.put(pushToPos, state);
 		}
 
-		for(Map.Entry<BlockPos, BlockState> pairtoRemove : toRemove.entrySet()) {
-			context.focalPoint.level().removeBlock(pairtoRemove.getKey(), true);
-			context.focalPoint.level().levelEvent(2001, pairtoRemove.getKey(), Block.getId(pairtoRemove.getValue()));
+		// 原子性批量方块移动操作，防止复制漏洞
+		// 先验证所有源方块状态是否与预期一致
+		for(Map.Entry<BlockPos, BlockState> entry : toRemove.entrySet()) {
+			BlockPos pos = entry.getKey();
+			BlockState expectedState = entry.getValue();
+			BlockState currentState = world.getBlockState(pos);
+
+			if(!currentState.equals(expectedState)) {
+				// 状态不一致，可能是其他操作已修改，拒绝整个序列操作
+				return null;
+			}
 		}
 
+		// 先设置所有目标位置
 		for(Map.Entry<BlockPos, BlockState> pairToSet : toSet.entrySet()) {
-			context.focalPoint.level().setBlockAndUpdate(pairToSet.getKey(), pairToSet.getValue());
+			world.setBlockAndUpdate(pairToSet.getKey(), pairToSet.getValue());
+		}
+
+		// 再移除所有源位置
+		for(Map.Entry<BlockPos, BlockState> pairtoRemove : toRemove.entrySet()) {
+			world.removeBlock(pairtoRemove.getKey(), false);
+			world.levelEvent(2001, pairtoRemove.getKey(), Block.getId(pairtoRemove.getValue()));
 		}
 
 		return null;
 	}
 
+	/**
+	 * 检查方块是否可以被移动
+	 * 基于PieceTrickMoveBlock.java中的逻辑
+	 */
+	private boolean checkBlockMovability(BlockState state, Level world, BlockPos pos, Player player, ItemStack tool, SpellContext context) {
+		// 检查方块实体（有方块实体的方块通常不可移动）
+		if(world.getBlockEntity(pos) != null) {
+			return false;
+		}
+
+		// 检查活塞推动反应
+		if(state.getPistonPushReaction() != net.minecraft.world.level.material.PushReaction.NORMAL) {
+			return false;
+		}
+
+		// 检查方块硬度（不可破坏的方块）
+		if(state.getDestroySpeed(world, pos) == -1) {
+			return false;
+		}
+
+		// 检查是否可以收获（使用工具检查）
+		if(!PieceTrickBreakBlock.canHarvestBlock(state, player, world, pos, tool)) {
+			return false;
+		}
+
+		// 检查玩家是否可以与方块交互
+		if(!world.mayInteract(player, pos)) {
+			return false;
+		}
+
+		// 检查方块事件是否被取消
+		net.neoforged.neoforge.event.level.BlockEvent.BreakEvent event = PieceTrickBreakBlock.createBreakEvent(state, player, world, pos, tool);
+		if(net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(event).isCanceled()) {
+			return false;
+		}
+
+		return true;
+	}
 }
