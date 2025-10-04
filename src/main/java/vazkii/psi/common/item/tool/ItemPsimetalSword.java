@@ -33,9 +33,9 @@ import vazkii.psi.api.cad.ISocketable;
 import vazkii.psi.api.spell.SpellContext;
 import vazkii.psi.common.core.handler.PlayerDataHandler;
 import vazkii.psi.common.core.handler.PlayerDataHandler.PlayerData;
-import vazkii.psi.common.item.ItemCAD;
 import vazkii.psi.common.item.base.ModDataComponents;
 import vazkii.psi.common.lib.LibMisc;
+import vazkii.psi.common.util.SpellCastHelper;
 
 import java.util.List;
 
@@ -64,10 +64,9 @@ public class ItemPsimetalSword extends SwordItem implements IPsimetalTool {
 
 			if(!playerCad.isEmpty()) {
 				ItemStack bullet = ISocketable.socketable(itemstack).getSelectedBullet();
-				ItemCAD.cast(player.getCommandSenderWorld(), player, data, bullet, playerCad, 5, 10, 0.05F,
+				SpellCastHelper.castToolSpell(player, itemstack, bullet, playerCad, 5, 10, 0.05F,
 						(SpellContext context) -> {
 							context.attackedEntity = target;
-							context.tool = itemstack;
 						});
 			}
 		}

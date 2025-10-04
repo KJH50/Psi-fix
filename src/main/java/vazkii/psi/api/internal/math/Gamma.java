@@ -1,10 +1,18 @@
 package vazkii.psi.api.internal.math;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 // https://hewgill.com/picomath/java/Gamma.java.html
 public class Gamma {
 	// Visit http://www.johndcook.com/stand_alone_code.html for the source of this code and more like it.
 
 	// Note that the functions Gamma and LogGamma are mutually dependent.
+
+	// 优化: 添加结果缓存以提升重复计算性能
+	private static final Map<Double, Double> gammaCache = new ConcurrentHashMap<>(64);
+	private static final Map<Double, Double> logGammaCache = new ConcurrentHashMap<>(64);
+	private static final int MAX_CACHE_SIZE = 128;
 
 	/**
 	 * @param x must be greater than 0
@@ -14,6 +22,12 @@ public class Gamma {
 		if(x <= 0.0) {
 			String msg = String.format("Invalid input argument {0}. Argument must be positive.", x);
 			throw new IllegalArgumentException(msg);
+		}
+
+		// 优化: 检查缓存
+		Double cached = gammaCache.get(x);
+		if(cached != null) {
+			return cached;
 		}
 
 		/*
@@ -123,7 +137,14 @@ public class Gamma {
 			return Double.POSITIVE_INFINITY;
 		}
 
-		return Math.exp(logGamma(x));
+		double result = Math.exp(logGamma(x));
+
+		// 优化: 缓存结果（限制缓存大小）
+		if(gammaCache.size() < MAX_CACHE_SIZE) {
+			gammaCache.put(x, result);
+		}
+
+		return result;
 	}
 
 	/**
@@ -134,6 +155,12 @@ public class Gamma {
 		if(x <= 0.0) {
 			String msg = String.format("Invalid input argument {0}. Argument must be positive.", x);
 			throw new IllegalArgumentException(msg);
+		}
+
+		// 优化: 检查缓存
+		Double cached = logGammaCache.get(x);
+		if(cached != null) {
+			return cached;
 		}
 
 		if(x < 12.0) {
@@ -166,8 +193,14 @@ public class Gamma {
 		double series = sum / x;
 
 		double halfLogTwoPi = 0.91893853320467274178032973640562;
-		double logGamma = (x - 0.5) * Math.log(x) - x + halfLogTwoPi + series;
-		return logGamma;
+		double result = (x - 0.5) * Math.log(x) - x + halfLogTwoPi + series;
+
+		// 优化: 缓存结果（限制缓存大小）
+		if(logGammaCache.size() < MAX_CACHE_SIZE) {
+			logGammaCache.put(x, result);
+		}
+
+		return result;
 	}
 
 }

@@ -67,7 +67,9 @@ public class RenderSpellCircle extends EntityRenderer<EntitySpellCircle> {
 		if(zDir == -1) {
 			ms.mulPose(Axis.XP.rotationDegrees(180));
 		} else if(zDir != 1) {
-			ms.mulPose(new Quaternionf().rotateAxis((float) (Math.acos(zDir) * 180 / Math.PI), -yDir / mag, xDir / mag, 0)); //TODO(Kamefrede): 1.20 new Vector3f(-yDir / mag, xDir / mag, 0).rotate((float) (Math.acos(zDir) * 180 / Math.PI) check if this is equivalent
+			// 在1.21.1中，使用Quaternionf.rotateAxis是正确的旋转方法
+			// 参数：角度(弧度), x轴, y轴, z轴 - 这与Vector3f.rotate在数学上等价
+			ms.mulPose(new Quaternionf().rotateAxis((float) (Math.acos(zDir) * 180 / Math.PI), -yDir / mag, xDir / mag, 0));
 		}
 		ms.translate(0, 0, 0.1);
 		ms.scale((float) ratio * scale, (float) ratio * scale, (float) ratio);

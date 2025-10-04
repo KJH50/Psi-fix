@@ -30,6 +30,7 @@ import vazkii.psi.api.spell.ISpellImmune;
 import vazkii.psi.api.spell.Spell;
 import vazkii.psi.api.spell.SpellContext;
 import vazkii.psi.common.Psi;
+import vazkii.psi.common.lib.LibNBTTags;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -39,15 +40,6 @@ public class EntitySpellCircle extends Entity implements ISpellImmune {
 	public static final int CAST_DELAY = 5;
 	public static final int LIVE_TIME = (CAST_TIMES + 2) * CAST_DELAY;
 	public static final EntityDataAccessor<ItemStack> COLORIZER_DATA = SynchedEntityData.defineId(EntitySpellCircle.class, EntityDataSerializers.ITEM_STACK);
-	private static final String TAG_COLORIZER = "colorizer";
-	private static final String TAG_BULLET = "bullet";
-	private static final String TAG_CASTER = "caster";
-	private static final String TAG_TIME_ALIVE = "timeAlive";
-	private static final String TAG_TIMES_CAST = "timesCast";
-
-	private static final String TAG_LOOK_X = "savedLookX";
-	private static final String TAG_LOOK_Y = "savedLookY";
-	private static final String TAG_LOOK_Z = "savedLookZ";
 	private static final EntityDataAccessor<ItemStack> BULLET_DATA = SynchedEntityData.defineId(EntitySpellCircle.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Optional<UUID>> CASTER_UUID = SynchedEntityData.defineId(EntitySpellCircle.class, EntityDataSerializers.OPTIONAL_UUID);
 	private static final EntityDataAccessor<Integer> TIME_ALIVE = SynchedEntityData.defineId(EntitySpellCircle.class, EntityDataSerializers.INT);
@@ -91,43 +83,43 @@ public class EntitySpellCircle extends Entity implements ISpellImmune {
 		if(!colorizer.isEmpty()) {
 			colorizerCmp = colorizer.save(this.registryAccess(), colorizerCmp);
 		}
-		tagCompound.put(TAG_COLORIZER, colorizerCmp);
+		tagCompound.put(LibNBTTags.TAG_COLORIZER, colorizerCmp);
 
 		Tag bulletCmp = new CompoundTag();
 		ItemStack bullet = entityData.get(BULLET_DATA);
 		if(!bullet.isEmpty()) {
 			bulletCmp = bullet.save(this.registryAccess(), bulletCmp);
 		}
-		tagCompound.put(TAG_BULLET, bulletCmp);
+		tagCompound.put(LibNBTTags.TAG_BULLET, bulletCmp);
 
-		entityData.get(CASTER_UUID).ifPresent(u -> tagCompound.putString(TAG_CASTER, u.toString()));
-		tagCompound.putInt(TAG_TIME_ALIVE, getTimeAlive());
-		tagCompound.putInt(TAG_TIMES_CAST, entityData.get(TIMES_CAST));
+		entityData.get(CASTER_UUID).ifPresent(u -> tagCompound.putString(LibNBTTags.TAG_CASTER, u.toString()));
+		tagCompound.putInt(LibNBTTags.TAG_TIME_ALIVE, getTimeAlive());
+		tagCompound.putInt(LibNBTTags.TAG_TIMES_CAST, entityData.get(TIMES_CAST));
 
-		tagCompound.putFloat(TAG_LOOK_X, entityData.get(LOOK_X));
-		tagCompound.putFloat(TAG_LOOK_Y, entityData.get(LOOK_Y));
-		tagCompound.putFloat(TAG_LOOK_Z, entityData.get(LOOK_Z));
+		tagCompound.putFloat(LibNBTTags.TAG_LOOK_X, entityData.get(LOOK_X));
+		tagCompound.putFloat(LibNBTTags.TAG_LOOK_Y, entityData.get(LOOK_Y));
+		tagCompound.putFloat(LibNBTTags.TAG_LOOK_Z, entityData.get(LOOK_Z));
 	}
 
 	@Override
 	public void readAdditionalSaveData(@NotNull CompoundTag tagCompound) {
-		CompoundTag colorizerCmp = tagCompound.getCompound(TAG_COLORIZER);
+		CompoundTag colorizerCmp = tagCompound.getCompound(LibNBTTags.TAG_COLORIZER);
 		ItemStack colorizer = ItemStack.parseOptional(this.registryAccess(), colorizerCmp);
 		entityData.set(COLORIZER_DATA, colorizer);
 
-		CompoundTag bulletCmp = tagCompound.getCompound(TAG_BULLET);
+		CompoundTag bulletCmp = tagCompound.getCompound(LibNBTTags.TAG_BULLET);
 		ItemStack bullet = ItemStack.parseOptional(this.registryAccess(), bulletCmp);
 		entityData.set(BULLET_DATA, bullet);
 
-		if(tagCompound.contains(TAG_CASTER)) {
-			entityData.set(CASTER_UUID, Optional.of(UUID.fromString(tagCompound.getString(TAG_CASTER))));
+		if(tagCompound.contains(LibNBTTags.TAG_CASTER)) {
+			entityData.set(CASTER_UUID, Optional.of(UUID.fromString(tagCompound.getString(LibNBTTags.TAG_CASTER))));
 		}
-		setTimeAlive(tagCompound.getInt(TAG_TIME_ALIVE));
-		entityData.set(TIMES_CAST, tagCompound.getInt(TAG_TIMES_CAST));
+		setTimeAlive(tagCompound.getInt(LibNBTTags.TAG_TIME_ALIVE));
+		entityData.set(TIMES_CAST, tagCompound.getInt(LibNBTTags.TAG_TIMES_CAST));
 
-		entityData.set(LOOK_X, tagCompound.getFloat(TAG_LOOK_X));
-		entityData.set(LOOK_Y, tagCompound.getFloat(TAG_LOOK_Y));
-		entityData.set(LOOK_Z, tagCompound.getFloat(TAG_LOOK_Z));
+		entityData.set(LOOK_X, tagCompound.getFloat(LibNBTTags.TAG_LOOK_X));
+		entityData.set(LOOK_Y, tagCompound.getFloat(LibNBTTags.TAG_LOOK_Y));
+		entityData.set(LOOK_Z, tagCompound.getFloat(LibNBTTags.TAG_LOOK_Z));
 	}
 
 	@Override

@@ -29,7 +29,7 @@ import java.util.List;
 
 public class SideConfigWidget extends AbstractWidget {
 
-	public final List<Button> configButtons = new ArrayList<>();
+	public final List<Button> configButtons = new ArrayList<>(8);
 	public final GuiProgrammer parent;
 	public boolean configEnabled = false;
 
@@ -50,7 +50,8 @@ public class SideConfigWidget extends AbstractWidget {
 			piece = parent.spell.grid.gridData[GuiProgrammer.selectedX][GuiProgrammer.selectedY];
 		}
 		if(configEnabled && !parent.takingScreenshot) {
-			graphics.blit(GuiProgrammer.texture, parent.left - 81, parent.top + 55, parent.xSize, 30, 81, 115); // TODO(Kamefrede): 1.20 check if this is correct
+			// 在1.21.1中，blit方法参数正确：纹理, x, y, u, v, width, height
+			graphics.blit(GuiProgrammer.texture, parent.left - 81, parent.top + 55, parent.xSize, 30, 81, 115);
 			String configStr = I18n.get("psimisc.config");
 			graphics.drawString(this.parent.getMinecraft().font, configStr, parent.left - parent.getMinecraft().font.width(configStr) - 2, parent.top + 45, 0xFFFFFF);
 

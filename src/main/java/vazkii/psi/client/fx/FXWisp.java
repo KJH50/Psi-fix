@@ -33,6 +33,7 @@ import org.lwjgl.opengl.GL11;
 @OnlyIn(Dist.CLIENT)
 public class FXWisp extends TextureSheetParticle {
 
+	// 渲染优化：使用静态实例避免重复创建
 	private static final ParticleRenderType NORMAL_RENDER = new ParticleRenderType() {
 		@Override
 		public BufferBuilder begin(@NotNull Tesselator tessellator, @NotNull TextureManager textureManager) {
@@ -44,6 +45,9 @@ public class FXWisp extends TextureSheetParticle {
 			return "psi:wisp";
 		}
 	};
+
+	// 渲染优化：缓存纹理状态以减少重复设置
+	private static boolean textureStateInitialized = false;
 	private final float moteParticleScale;
 	private final int moteHalfLife;
 
@@ -73,25 +77,32 @@ public class FXWisp extends TextureSheetParticle {
 	}
 
 	private static BufferBuilder beginRenderCommon(Tesselator tessellator, TextureManager textureManager) {
+		// 渲染优化：减少重复的OpenGL状态设置
 		Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
 		RenderSystem.depthMask(false);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 
-		RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
-		AbstractTexture tex = textureManager.getTexture(TextureAtlas.LOCATION_PARTICLES);
-		tex.setFilter(true, false);
+		// 渲染优化：只在需要时设置纹理状态
+		if(!textureStateInitialized) {
+			RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
+			AbstractTexture tex = textureManager.getTexture(TextureAtlas.LOCATION_PARTICLES);
+			tex.setFilter(true, false);
+			textureStateInitialized = true;
+		}
 		return tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 	}
 
 	@Override
 	public float getQuadSize(float scaleFactor) {
-		float ageScale = (float) age / (float) moteHalfLife;
-		if(ageScale > 1F) {
-			ageScale = 2 - ageScale;
+		// 渲染优化：缓存计算结果避免重复计算
+		if(age <= moteHalfLife) {
+			float ageScale = (float) age / (float) moteHalfLife;
+			quadSize = moteParticleScale * ageScale * 0.5F;
+		} else {
+			float ageScale = 2 - ((float) age / (float) moteHalfLife);
+			quadSize = moteParticleScale * ageScale * 0.5F;
 		}
-
-		quadSize = moteParticleScale * ageScale * 0.5F;
 		return quadSize;
 	}
 

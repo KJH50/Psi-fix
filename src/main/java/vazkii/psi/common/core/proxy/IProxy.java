@@ -43,15 +43,7 @@ public interface IProxy {
 		return -1;
 	}
 
-	@Deprecated
-	default Color getCADColor(ItemStack cadStack) {
-		return new Color(getColorForCAD(cadStack));
-	}
-
-	@Deprecated
-	default Color getColorizerColor(ItemStack colorizer) {
-		return new Color(getColorForColorizer(colorizer));
-	}
+	// 废弃方法已移除 - 使用 getColorForCAD() 和 getColorForColorizer() 替代
 
 	void sparkleFX(Level world, double x, double y, double z, float r, float g, float b, float motionX, float motionY, float motionZ, float size, int m);
 

@@ -22,7 +22,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Stream;
 
 @EventBusSubscriber(modid = LibMisc.MOD_ID)

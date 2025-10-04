@@ -116,6 +116,8 @@ dependencies {
 
     compileOnly "vazkii.patchouli:Patchouli:${patchouli_version}-NEOFORGE:api"
     runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}-NEOFORGE"
+    
+
 }
 
 tasks.withType(ProcessResources).configureEach {
@@ -166,6 +168,8 @@ jar {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
+
 
 idea {
     module {

@@ -33,6 +33,7 @@ import org.lwjgl.opengl.GL11;
 @OnlyIn(Dist.CLIENT)
 public class FXSparkle extends TextureSheetParticle {
 
+	// 渲染优化：使用静态实例避免重复创建
 	private static final ParticleRenderType NORMAL_RENDER = new ParticleRenderType() {
 		@Override
 		public BufferBuilder begin(@NotNull Tesselator tessellator, @NotNull TextureManager textureManager) {
@@ -44,6 +45,9 @@ public class FXSparkle extends TextureSheetParticle {
 			return "psi:sparkle";
 		}
 	};
+
+	// 渲染优化：缓存纹理状态以减少重复设置
+	private static boolean textureStateInitialized = false;
 
 	public FXSparkle(ClientLevel world, double x, double y, double z, float size,
 			float red, float green, float blue, int m, double mx, double my, double mz, SpriteSet sprite) {
@@ -70,20 +74,27 @@ public class FXSparkle extends TextureSheetParticle {
 	}
 
 	private static BufferBuilder beginRenderCommon(Tesselator tessellator, TextureManager textureManager) {
+		// 渲染优化：减少重复的OpenGL状态设置
 		Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
 		RenderSystem.enableDepthTest();
 		RenderSystem.depthMask(false);
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-		RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
-		AbstractTexture tex = textureManager.getTexture(TextureAtlas.LOCATION_PARTICLES);
-		tex.setFilter(true, false);
+
+		// 渲染优化：只在需要时设置纹理状态
+		if(!textureStateInitialized) {
+			RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
+			AbstractTexture tex = textureManager.getTexture(TextureAtlas.LOCATION_PARTICLES);
+			tex.setFilter(true, false);
+			textureStateInitialized = true;
+		}
 		return tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 	}
 
 	@Override
 	public float getQuadSize(float partialTicks) {
-		return quadSize * (lifetime - age + 1) / (float) lifetime;
+		// 渲染优化：避免重复除法运算
+		return quadSize * (1.0f - (float) age / (float) lifetime);
 	}
 
 	@Override

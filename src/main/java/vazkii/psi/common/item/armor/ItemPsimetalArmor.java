@@ -38,15 +38,15 @@ import vazkii.psi.api.exosuit.IPsiEventArmor;
 import vazkii.psi.api.exosuit.PsiArmorEvent;
 import vazkii.psi.api.internal.TooltipHelper;
 import vazkii.psi.api.material.PsimetalArmorMaterial;
-import vazkii.psi.api.spell.SpellContext;
 import vazkii.psi.common.core.handler.PlayerDataHandler;
 import vazkii.psi.common.core.handler.PlayerDataHandler.PlayerData;
-import vazkii.psi.common.item.ItemCAD;
 import vazkii.psi.common.item.base.ModDataComponents;
 import vazkii.psi.common.item.tool.IPsimetalTool;
 import vazkii.psi.common.item.tool.ToolSocketable;
 import vazkii.psi.common.lib.LibMisc;
 import vazkii.psi.common.lib.LibResources;
+import vazkii.psi.common.util.DataComponentHelper;
+import vazkii.psi.common.util.SpellCastHelper;
 
 import java.util.List;
 
@@ -109,17 +109,12 @@ public class ItemPsimetalArmor extends ArmorItem implements IPsimetalTool, IPsiE
 		ItemStack playerCad = PsiAPI.getPlayerCAD(event.getEntity());
 
 		if(IPsimetalTool.isEnabled(stack) && !playerCad.isEmpty()) {
-			int timesCast = stack.getOrDefault(ModDataComponents.TIMES_CAST, 0);
+			int timesCast = DataComponentHelper.getTimesCast(stack);
 
 			ItemStack bullet = ISocketable.socketable(stack).getSelectedBullet();
-			ItemCAD.cast(event.getEntity().getCommandSenderWorld(), event.getEntity(), data, bullet, playerCad, getCastCooldown(stack), 0, getCastVolume(), (SpellContext context) -> {
-				context.tool = stack;
-				context.attackingEntity = event.attacker;
-				context.damageTaken = event.damage;
-				context.loopcastIndex = timesCast;
-			}, (int) (data.calculateDamageDeduction((float) event.damage) * 0.75));
+			SpellCastHelper.castArmorSpell(event.getEntity(), stack, bullet, playerCad, getCastCooldown(stack), (int) (data.calculateDamageDeduction((float) event.damage) * 0.75), getCastVolume(), event.attacker, (float) event.damage);
 
-			stack.set(ModDataComponents.TIMES_CAST, timesCast + 1);
+			DataComponentHelper.incrementTimesCast(stack);
 		}
 	}
 
@@ -178,13 +173,13 @@ public class ItemPsimetalArmor extends ArmorItem implements IPsimetalTool, IPsiE
 		@Override
 		public void setSelectedSlot(int slot) {
 			super.setSelectedSlot(slot);
-			tool.set(ModDataComponents.TIMES_CAST, 0);
+			DataComponentHelper.resetTimesCast(tool);
 		}
 
 		@Override
 		public void setBulletInSocket(int slot, ItemStack bullet) {
 			super.setBulletInSocket(slot, bullet);
-			tool.set(ModDataComponents.TIMES_CAST, 0);
+			DataComponentHelper.resetTimesCast(tool);
 		}
 
 	}

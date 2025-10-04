@@ -38,6 +38,7 @@ import vazkii.psi.api.spell.ISpellAcceptor;
 import vazkii.psi.api.spell.Spell;
 import vazkii.psi.common.item.base.ModDataComponents;
 import vazkii.psi.common.item.component.ItemCADSocket;
+import vazkii.psi.common.util.DataComponentHelper;
 
 import java.util.List;
 import java.util.Objects;
@@ -149,12 +150,12 @@ public class CADData implements ICapabilityProvider<ItemCapability<?, Void>, Voi
 
 	@Override
 	public int getSelectedSlot() {
-		return cad.getOrDefault(ModDataComponents.SELECTED_SLOT, 0);
+		return DataComponentHelper.getSelectedSlot(cad);
 	}
 
 	@Override
 	public void setSelectedSlot(int slot) {
-		cad.set(ModDataComponents.SELECTED_SLOT, slot);
+		DataComponentHelper.setSelectedSlot(cad, slot);
 	}
 
 	@Override

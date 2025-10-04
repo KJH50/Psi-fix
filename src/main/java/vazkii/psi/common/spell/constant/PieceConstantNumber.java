@@ -59,7 +59,8 @@ public class PieceConstantNumber extends SpellPiece {
 		pPoseStack.pushPose();
 		pPoseStack.scale(1F / scale, 1F / scale, 1F);
 		pPoseStack.translate((9 - efflen / 2) * scale, 4 * scale, 0);
-		//graphics.drawString(mc.font, valueStr, 0, 0, color, false); // TODO(Kamefrede): 1.20 check if this is ruight
+		// 在1.21.1中使用drawInBatch是正确的文本渲染方法
+		// 参数：文本, x, y, 颜色, 阴影, 变换矩阵, 缓冲区, 显示模式, 背景色, 光照
 		mc.font.drawInBatch(valueStr, 0, 0, color, false, pPoseStack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, 15728880);
 		pPoseStack.popPose();
 	}

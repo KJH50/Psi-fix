@@ -28,6 +28,7 @@ import vazkii.psi.api.spell.SpellContext;
 import vazkii.psi.common.Psi;
 import vazkii.psi.common.core.handler.PlayerDataHandler;
 import vazkii.psi.common.item.base.ModDataComponents;
+import vazkii.psi.common.util.DataComponentHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class ItemFlashRing extends Item {
 			if(compound.contains("spell")) {
 				pStack.set(DataComponents.RARITY, Rarity.RARE);
 				Spell spell = Spell.createFromNBT(compound.getCompound("spell"));
-				pStack.set(ModDataComponents.SPELL, spell);
+				DataComponentHelper.setSpell(pStack, spell);
 				compound.remove("spell");
 			} else {
 				pStack.set(DataComponents.RARITY, Rarity.COMMON);
@@ -66,7 +67,7 @@ public class ItemFlashRing extends Item {
 			return super.getName(stack);
 		}
 
-		Spell cmp = stack.getOrDefault(ModDataComponents.SPELL, new Spell());
+		Spell cmp = DataComponentHelper.getSpell(stack);
 		String name = cmp.name;
 
 		if(name.isEmpty()) {

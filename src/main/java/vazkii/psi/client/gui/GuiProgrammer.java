@@ -35,7 +35,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.api.distmarker.Dist;
@@ -64,8 +63,14 @@ import vazkii.psi.common.network.MessageRegister;
 import vazkii.psi.common.network.message.MessageSpellModified;
 import vazkii.psi.common.spell.SpellCompiler;
 import vazkii.psi.common.spell.other.PieceConnector;
+import vazkii.psi.common.util.MessageHelper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 @OnlyIn(Dist.CLIENT)
@@ -91,7 +96,7 @@ public class GuiProgrammer extends Screen {
 	public final Stack<Spell> undoSteps = new Stack<>();
 	public final Stack<Spell> redoSteps = new Stack<>();
 	public Spell spell;
-	public List<Component> tooltip = new ArrayList<>();
+	public List<Component> tooltip = new ArrayList<>(8);
 	public Either<CompiledSpell, SpellCompilationException> compileResult;
 	public int xSize, ySize, padLeft, padTop, left, top, gridLeft, gridTop;
 	public int cursorX, cursorY;
@@ -226,7 +231,7 @@ public class GuiProgrammer extends Screen {
 							for(Tag mod : mods) {
 								String modName = ((CompoundTag) mod).getString(Spell.TAG_MOD_NAME);
 								if(!PsiAPI.getSpellPieceRegistry().keySet().stream().map(ResourceLocation::getNamespace).collect(Collectors.toSet()).contains(modName)) {
-									player.sendSystemMessage(Component.translatable("psimisc.modnotfound", modName).setStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
+									MessageHelper.sendErrorMessage(player, "psimisc.modnotfound", modName);
 								}
 								if(modName.equals("psi")) {
 									boolean sendMessage = false;
@@ -246,12 +251,12 @@ public class GuiProgrammer extends Screen {
 										}
 									}
 									if(sendMessage) {
-										player.sendSystemMessage(Component.translatable("psimisc.spellonnewerversion").setStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
+										MessageHelper.sendErrorMessage(player, "psimisc.spellonnewerversion");
 									}
 								}
 							}
 						} else {
-							player.sendSystemMessage(Component.translatable("psimisc.spellmaynotfunctionasintended").setStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
+							MessageHelper.sendErrorMessage(player, "psimisc.spellmaynotfunctionasintended");
 						}
 						spell = Spell.createFromNBT(cmp);
 						if(spell == null) {
@@ -264,7 +269,7 @@ public class GuiProgrammer extends Screen {
 								if(piece != null) {
 									ResourceLocation group = PsiAPI.getGroupForPiece(piece.getClass());
 									if(!player.isCreative() && (group == null || !data.isPieceGroupUnlocked(group, piece.registryKey))) {
-										player.sendSystemMessage(Component.translatable("psimisc.missing_pieces").setStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
+										MessageHelper.sendErrorMessage(player, "psimisc.missing_pieces");
 										return;
 									}
 								}
@@ -275,7 +280,7 @@ public class GuiProgrammer extends Screen {
 						spellNameField.setValue(spell.name);
 						onSpellChanged(false);
 					} catch (Exception t) {
-						player.sendSystemMessage(Component.translatable("psimisc.malformed_json", t.getMessage()).setStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
+						MessageHelper.sendErrorMessage(player, "psimisc.malformed_json", t.getMessage());
 						Psi.logger.error("Error importing spell from clipboard", t);
 					}
 				}
@@ -571,8 +576,8 @@ public class GuiProgrammer extends Screen {
 
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		//TODO(Kamefrede): 1.20 find alternative to this
-		//getMinecraft().keyboardHandler.setSendRepeatsToGui(true);
+		// 键盘重复输入在1.21.1中通过Screen基类自动处理
+		// 不再需要手动设置setSendRepeatsToGui
 		if(programmer != null) {
 			spell = programmer.spell;
 		}

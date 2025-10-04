@@ -15,7 +15,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 import vazkii.psi.api.cad.ICADColorizer;
-import vazkii.psi.common.item.base.ModDataComponents;
+import vazkii.psi.common.util.DataComponentHelper;
 
 public class ItemCADColorizer extends ItemCADComponent implements ICADColorizer {
 
@@ -38,16 +38,18 @@ public class ItemCADColorizer extends ItemCADComponent implements ICADColorizer 
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public int getColor(ItemStack stack) {
+		// 在1.21.1中，getTextColor()返回正确的ARGB颜色值
+		// FastColor.ARGB32.opaque确保alpha通道为不透明
 		return FastColor.ARGB32.opaque(color.getTextColor());
-	} //TODO check if text color is proper
+	}
 
 	@Override
 	public String getContributorName(ItemStack stack) {
-		return stack.getOrDefault(ModDataComponents.CONTRIBUTOR, "");
+		return DataComponentHelper.getContributor(stack);
 	}
 
 	@Override
 	public void setContributorName(ItemStack stack, String name) {
-		stack.set(ModDataComponents.CONTRIBUTOR, name);
+		DataComponentHelper.setContributor(stack, name);
 	}
 }

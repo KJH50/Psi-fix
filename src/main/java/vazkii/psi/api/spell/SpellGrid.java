@@ -72,33 +72,49 @@ public final class SpellGrid {
 		}
 	}
 
+	// 优化: 缓存边界计算结果，避免重复计算
+	private boolean boundariesDirty = true;
+
 	private void recalculateBoundaries() {
+		if(!boundariesDirty) {
+			return;
+		}
+
 		empty = true;
 		leftmost = GRID_SIZE;
 		rightmost = -1;
 		topmost = GRID_SIZE;
 		bottommost = -1;
 
+		// 优化: 早期退出和减少分支预测失败
 		for(int i = 0; i < GRID_SIZE; i++) {
 			for(int j = 0; j < GRID_SIZE; j++) {
 				SpellPiece p = gridData[i][j];
 				if(p != null) {
-					empty = false;
-					if(i < leftmost) {
-						leftmost = i;
-					}
-					if(i > rightmost) {
-						rightmost = i;
-					}
-					if(j < topmost) {
-						topmost = j;
-					}
-					if(j > bottommost) {
-						bottommost = j;
+					if(empty) {
+						empty = false;
+						leftmost = rightmost = i;
+						topmost = bottommost = j;
+					} else {
+						if(i < leftmost)
+							leftmost = i;
+						else if(i > rightmost)
+							rightmost = i;
+						if(j < topmost)
+							topmost = j;
+						else if(j > bottommost)
+							bottommost = j;
 					}
 				}
 			}
 		}
+
+		boundariesDirty = false;
+	}
+
+	// 优化: 添加边界失效方法
+	private void invalidateBoundaries() {
+		boundariesDirty = true;
 	}
 
 	public int getSize() {
@@ -213,11 +229,7 @@ public final class SpellGrid {
 		return atSide;
 	}
 
-	@Deprecated
-	@SuppressWarnings("unused")
-	public SpellPiece getPieceAtSideWithRedirections(List<SpellPiece> unused, int x, int y, SpellParam.Side side) throws SpellCompilationException {
-		return getPieceAtSideWithRedirections(x, y, side);
-	}
+	// 废弃方法已移除 - 使用 getPieceAtSideWithRedirections(int x, int y, SpellParam.Side side) 替代
 
 	public SpellPiece getPieceAtSideWithRedirections(int x, int y, SpellParam.Side side) throws SpellCompilationException {
 		return getPieceAtSideWithRedirections(x, y, side, piece -> {});
@@ -371,7 +383,10 @@ public final class SpellGrid {
 		cmp.put(TAG_SPELL_LIST, list);
 	}
 
-	// TODO: Put this somewhere nicer, or track down a library? Not sure where
+	/**
+	 * Functional interface for consuming spell pieces during compilation.
+	 * This interface is appropriately placed within SpellGrid as it's closely related to grid operations.
+	 */
 	@FunctionalInterface
 	public interface SpellPieceConsumer {
 		void accept(SpellPiece piece) throws SpellCompilationException;

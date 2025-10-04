@@ -10,14 +10,12 @@ package vazkii.psi.common.spell.trick;
 
 import net.minecraft.world.item.ItemStack;
 
-import vazkii.psi.api.PsiAPI;
-import vazkii.psi.api.cad.ICAD;
 import vazkii.psi.api.cad.ISocketable;
 import vazkii.psi.api.spell.*;
 import vazkii.psi.api.spell.piece.PieceTrick;
-import vazkii.psi.common.core.handler.PlayerDataHandler;
+import vazkii.psi.common.util.CADHelper;
+import vazkii.psi.common.util.CapabilityHelper;
 
-import java.util.Objects;
 import java.util.Random;
 
 public class PieceTrickRussianRoulette extends PieceTrick {
@@ -39,15 +37,13 @@ public class PieceTrickRussianRoulette extends PieceTrick {
 
 	@Override
 	public Object execute(SpellContext context) throws SpellRuntimeException {
-		ItemStack stack = context.tool.isEmpty() ? PsiAPI.getPlayerCAD(context.caster) : context.tool;
-		boolean updateLoopcast = (stack.getItem() instanceof ICAD) && (context.castFrom == PlayerDataHandler.get(context.caster).loopcastHand);
-		ISocketable capability = Objects.requireNonNull(stack.getCapability(PsiAPI.SOCKETABLE_CAPABILITY));
+		ItemStack stack = CADHelper.getEffectiveCAD(context);
+		boolean updateLoopcast = CADHelper.shouldUpdateLoopcast(context, stack);
+		ISocketable capability = CapabilityHelper.getSocketableCapability(stack);
 		int targetSlot = getRandomSocketableSlot(capability);
 
 		capability.setSelectedSlot(targetSlot);
-		if(updateLoopcast) {
-			PlayerDataHandler.get(context.caster).lastTickLoopcastStack = stack.copy();
-		}
+		CADHelper.updateLoopcastIfNeeded(context, stack);
 		return null;
 	}
 

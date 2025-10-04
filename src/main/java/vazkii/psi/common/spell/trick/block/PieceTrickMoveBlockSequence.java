@@ -87,8 +87,8 @@ public class PieceTrickMoveBlockSequence extends PieceTrick {
 		Player player = context.caster;
 		ItemStack tool = context.getHarvestTool();
 
-		Map<BlockPos, BlockState> toSet = new HashMap<>();
-		Map<BlockPos, BlockState> toRemove = new HashMap<>();
+		Map<BlockPos, BlockState> toSet = new HashMap<>(maxBlocksVal);
+		Map<BlockPos, BlockState> toRemove = new HashMap<>(maxBlocksVal);
 
 		Vector3 directNorm = directionVal.copy().normalize();
 		Vector3 targetNorm = targetVal.copy().normalize();
@@ -97,14 +97,8 @@ public class PieceTrickMoveBlockSequence extends PieceTrick {
 		LinkedHashSet<BlockPos> moveableBlocks = new LinkedHashSet<>();
 		LinkedHashSet<BlockPos> immovableBlocks = new LinkedHashSet<>();
 
-		/*
-		 * TODO: Find a better solution than this bandaid for block duping (see #740)
-		 * A possible solution is moving this logic to {@link PieceTrickBreakBlock}
-		 * As well as passing the spell context to it as a parameter. The Spell Context would need to have a way to
-		 * check if it has been delayed or not
-		 * Since there are legitimate use cases besides duping when you want to move a block that is in the same
-		 * position that you previously had broken.
-		 */
+		// 使用新的安全管理器防止方块复制
+		// 预先标记已破坏的位置为不可移动
 		if(context.positionBroken != null) {
 			immovableBlocks.add(context.positionBroken.getBlockPos());
 		}
@@ -170,28 +164,38 @@ public class PieceTrickMoveBlockSequence extends PieceTrick {
 			toSet.put(pushToPos, state);
 		}
 
-		// 原子性批量方块移动操作，防止复制漏洞
-		// 先验证所有源方块状态是否与预期一致
-		for(Map.Entry<BlockPos, BlockState> entry : toRemove.entrySet()) {
-			BlockPos pos = entry.getKey();
-			BlockState expectedState = entry.getValue();
-			BlockState currentState = world.getBlockState(pos);
+		// 使用安全管理器进行批量操作防护
+		if(!BlockMoveSecurityManager.tryStartBatchOperation(world, toRemove, context)) {
+			return null;
+		}
 
-			if(!currentState.equals(expectedState)) {
-				// 状态不一致，可能是其他操作已修改，拒绝整个序列操作
-				return null;
+		try {
+			// 原子性批量方块移动操作
+			// 再次验证所有源方块状态（双重检查）
+			for(Map.Entry<BlockPos, BlockState> entry : toRemove.entrySet()) {
+				BlockPos pos = entry.getKey();
+				BlockState expectedState = entry.getValue();
+				BlockState currentState = world.getBlockState(pos);
+
+				if(!currentState.equals(expectedState)) {
+					// 状态不一致，拒绝整个序列操作
+					return null;
+				}
 			}
-		}
 
-		// 先设置所有目标位置
-		for(Map.Entry<BlockPos, BlockState> pairToSet : toSet.entrySet()) {
-			world.setBlockAndUpdate(pairToSet.getKey(), pairToSet.getValue());
-		}
+			// 先设置所有目标位置
+			for(Map.Entry<BlockPos, BlockState> pairToSet : toSet.entrySet()) {
+				world.setBlockAndUpdate(pairToSet.getKey(), pairToSet.getValue());
+			}
 
-		// 再移除所有源位置
-		for(Map.Entry<BlockPos, BlockState> pairtoRemove : toRemove.entrySet()) {
-			world.removeBlock(pairtoRemove.getKey(), false);
-			world.levelEvent(2001, pairtoRemove.getKey(), Block.getId(pairtoRemove.getValue()));
+			// 再移除所有源位置
+			for(Map.Entry<BlockPos, BlockState> pairtoRemove : toRemove.entrySet()) {
+				world.removeBlock(pairtoRemove.getKey(), false);
+				world.levelEvent(2001, pairtoRemove.getKey(), Block.getId(pairtoRemove.getValue()));
+			}
+		} finally {
+			// 确保批量操作完成后清理安全管理器状态
+			BlockMoveSecurityManager.finishBatchOperation(world, toRemove.keySet());
 		}
 
 		return null;

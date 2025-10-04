@@ -136,18 +136,32 @@ public class PieceTrickBreakBlock extends PieceTrick {
 		return ItemStack.EMPTY;
 	}
 
-	//TODO Fix mining level on blocks that can be broken by hand.
+	/**
+	 * 修复：正确计算方块的挖掘等级
+	 * 解决了手工可破坏方块的挖掘等级计算问题
+	 */
 	public static int getHarvestLevel(BlockState state) {
-		if(Items.AIR.isCorrectToolForDrops(Items.AIR.getDefaultInstance(), state)) {
+		// 检查是否需要正确的工具才能掉落物品
+		if(!state.requiresCorrectToolForDrops()) {
+			// 可以用手破坏的方块，挖掘等级为0
 			return 0;
 		}
-		for(int i = 0; i < HARVEST_TOOLS_BY_LEVEL.size(); i++) {
-			for(var tool : HARVEST_TOOLS_BY_LEVEL.get(i)) {
+
+		// 检查空气物品是否可以破坏（用于某些特殊方块）
+		if(Items.AIR.getDefaultInstance().isCorrectToolForDrops(state)) {
+			return 0;
+		}
+
+		// 从低到高检查各个等级的工具
+		for(int level = 0; level < HARVEST_TOOLS_BY_LEVEL.size(); level++) {
+			for(var tool : HARVEST_TOOLS_BY_LEVEL.get(level)) {
 				if(tool.isCorrectToolForDrops(state)) {
-					return i + 1;
+					return level + 1; // 工具等级从1开始
 				}
 			}
 		}
+
+		// 如果没有工具可以破坏，返回最高等级+1
 		return HARVEST_TOOLS_BY_LEVEL.size() + 1;
 	}
 

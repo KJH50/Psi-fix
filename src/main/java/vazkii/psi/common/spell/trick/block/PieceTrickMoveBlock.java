@@ -63,58 +63,58 @@ public class PieceTrickMoveBlock extends PieceTrick {
 		Level world = context.focalPoint.getCommandSenderWorld();
 		BlockPos pos = positionVal.toBlockPos();
 
-		/**
-		 * TODO: Find a better solution than this bandaid for block duping (see #740)
-		 * A possible solution is moving this logic to {@link PieceTrickBreakBlock}
-		 * As well as passing the spell context to it as a parameter. The Spell Context would need to have a way to
-		 * check if it has been delayed or not
-		 * Since there are legitimate use cases besides duping when you want to move a block that is in the same
-		 * position that you previously had broken.
-		 */
-		if(context.positionBroken != null && context.positionBroken.getBlockPos().equals(pos)) {
-			return null;
-		}
 		BlockState state = world.getBlockState(pos);
-		if(world.getBlockEntity(pos) != null || state.getPistonPushReaction() != PushReaction.NORMAL ||
-				state.getDestroySpeed(world, pos) == -1 ||
-				!PieceTrickBreakBlock.canHarvestBlock(state, context.caster, world, pos, tool)) {
+
+		// 使用新的安全管理器防止方块复制
+		if(!BlockMoveSecurityManager.tryStartOperation(world, pos, state, context, BlockMoveSecurityManager.OperationType.MOVE_SINGLE)) {
 			return null;
 		}
 
-		BlockEvent.BreakEvent event = PieceTrickBreakBlock.createBreakEvent(state, context.caster, world, pos, tool);
-		NeoForge.EVENT_BUS.post(event);
-		if(event.isCanceled()) {
-			return null;
-		}
-
-		if(!targetVal.isAxial() || targetVal.isZero()) {
-			return null;
-		}
-
-		Vector3 axis = targetVal.normalize();
-		int x = pos.getX() + (int) axis.x;
-		int y = pos.getY() + (int) axis.y;
-		int z = pos.getZ() + (int) axis.z;
-		BlockPos pos1 = new BlockPos(x, y, z);
-		BlockState state1 = world.getBlockState(pos1);
-
-		if(!world.mayInteract(context.caster, pos) || !world.mayInteract(context.caster, pos1)) {
-			return null;
-		}
-
-		if(state1.isAir() || state1.canBeReplaced()) {
-			// 原子性方块移动操作，防止复制漏洞
-			// 先验证源方块状态是否与预期一致
-			BlockState currentState = world.getBlockState(pos);
-			if(!currentState.equals(state)) {
-				// 状态不一致，可能是其他操作已修改，拒绝移动
+		try {
+			// 检查方块是否可移动
+			if(world.getBlockEntity(pos) != null || state.getPistonPushReaction() != PushReaction.NORMAL ||
+					state.getDestroySpeed(world, pos) == -1 ||
+					!PieceTrickBreakBlock.canHarvestBlock(state, context.caster, world, pos, tool)) {
 				return null;
 			}
 
-			// 原子性操作：先设置目标位置，再移除源位置
-			world.setBlock(pos1, state, 3); // 使用标志3：UPDATE_ALL | SEND_TO_CLIENTS
-			world.removeBlock(pos, false);
-			world.levelEvent(2001, pos, Block.getId(state));
+			BlockEvent.BreakEvent event = PieceTrickBreakBlock.createBreakEvent(state, context.caster, world, pos, tool);
+			NeoForge.EVENT_BUS.post(event);
+			if(event.isCanceled()) {
+				return null;
+			}
+
+			if(!targetVal.isAxial() || targetVal.isZero()) {
+				return null;
+			}
+
+			Vector3 axis = targetVal.normalize();
+			int x = pos.getX() + (int) axis.x;
+			int y = pos.getY() + (int) axis.y;
+			int z = pos.getZ() + (int) axis.z;
+			BlockPos pos1 = new BlockPos(x, y, z);
+			BlockState state1 = world.getBlockState(pos1);
+
+			if(!world.mayInteract(context.caster, pos) || !world.mayInteract(context.caster, pos1)) {
+				return null;
+			}
+
+			if(state1.isAir() || state1.canBeReplaced()) {
+				// 安全的原子性方块移动操作
+				// 再次验证源方块状态（双重检查）
+				BlockState currentState = world.getBlockState(pos);
+				if(!currentState.equals(state)) {
+					return null;
+				}
+
+				// 原子性操作：先设置目标位置，再移除源位置
+				world.setBlock(pos1, state, 3); // 使用标志3：UPDATE_ALL | SEND_TO_CLIENTS
+				world.removeBlock(pos, false);
+				world.levelEvent(2001, pos, Block.getId(state));
+			}
+		} finally {
+			// 确保操作完成后清理安全管理器状态
+			BlockMoveSecurityManager.finishOperation(world, pos);
 		}
 
 		return null;

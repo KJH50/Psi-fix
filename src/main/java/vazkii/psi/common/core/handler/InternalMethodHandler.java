@@ -78,8 +78,9 @@ public final class InternalMethodHandler implements IInternalMethodHandler {
 			Font fontRenderer = Minecraft.getInstance().font;
 			Screen screen = Minecraft.getInstance().screen;
 			assert screen != null;
-			graphics.renderTooltip(fontRenderer, tooltipData, java.util.Optional.empty(), x, y);//TODO Fix color/color2? Is it needed?
-			//GuiUtils.drawHoveringText(ms, tooltipData, x, y, width, height, -1, color2, color, color, fontRenderer);
+			// 在1.21.1中，renderTooltip使用默认的工具提示样式
+			// 自定义颜色通过Component的样式系统处理，不需要额外的color参数
+			graphics.renderTooltip(fontRenderer, tooltipData, java.util.Optional.empty(), x, y);
 		}
 	}
 

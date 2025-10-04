@@ -11,7 +11,6 @@ package vazkii.psi.common.item.armor;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -19,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import vazkii.psi.api.exosuit.IExosuitSensor;
 import vazkii.psi.api.exosuit.ISensorHoldable;
-import vazkii.psi.common.item.base.ModDataComponents;
+import vazkii.psi.common.util.DataComponentHelper;
 
 public class ItemPsimetalExosuitHelmet extends ItemPsimetalArmor implements ISensorHoldable {
 
@@ -55,11 +54,11 @@ public class ItemPsimetalExosuitHelmet extends ItemPsimetalArmor implements ISen
 
 	@Override
 	public ItemStack getAttachedSensor(ItemStack stack) {
-		return new ItemStack(stack.getOrDefault(ModDataComponents.SENSOR, Items.AIR));
+		return DataComponentHelper.getSensor(stack);
 	}
 
 	@Override
 	public void attachSensor(ItemStack stack, ItemStack sensor) {
-		stack.set(ModDataComponents.SENSOR, sensor.getItem());
+		DataComponentHelper.setSensor(stack, sensor.getItem());
 	}
 }

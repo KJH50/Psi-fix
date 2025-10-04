@@ -58,6 +58,7 @@ public class PsiRecipeGenerator extends RecipeProvider {
 	@Override
 	protected void buildRecipes(RecipeOutput consumer) {
 		specialRecipe(consumer, ModCraftingRecipes.SCAVENGE_TYPE, AssemblyScavengeRecipe::new, CraftingBookCategory.MISC);
+
 		specialRecipe(consumer, ModCraftingRecipes.BULLET_TO_DRIVE_TYPE, BulletToDriveRecipe::new, CraftingBookCategory.MISC);
 		specialRecipe(consumer, ModCraftingRecipes.COLORIZER_CHANGE_TYPE, ColorizerChangeRecipe::new, CraftingBookCategory.MISC);
 		specialRecipe(consumer, ModCraftingRecipes.DRIVE_DUPLICATE_TYPE, DriveDuplicateRecipe::new, CraftingBookCategory.MISC);

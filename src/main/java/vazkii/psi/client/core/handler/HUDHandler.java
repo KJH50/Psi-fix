@@ -49,6 +49,21 @@ import java.util.regex.Pattern;
 @EventBusSubscriber(modid = LibMisc.MOD_ID, value = Dist.CLIENT)
 public final class HUDHandler {
 
+	// Optimized: Pre-calculated rendering constants
+	private static final int PSI_BAR_WIDTH = 32;
+	private static final int PSI_BAR_HEIGHT = 140;
+	private static final int PSI_BAR_INNER_WIDTH = 16;
+	private static final int PSI_BAR_INNER_HEIGHT = 106;
+	private static final int PSI_BAR_PADDING = 3;
+	private static final int PSI_BAR_OFFSET_X = 8;
+	private static final int PSI_BAR_OFFSET_Y = 26;
+	private static final float PSI_BAR_R = 0.6F;
+	private static final float PSI_BAR_G = 0.65F;
+	private static final float PSI_BAR_B = 1F;
+	private static final float PSI_BAR_OVERFLOW_R = 1F;
+	private static final float PSI_BAR_OVERFLOW_G = 0.6F;
+	private static final float PSI_BAR_OVERFLOW_B = 0.6F;
+
 	public static final LayeredDraw.Layer SOCKETABLE_EQUIPPED_NAME = (graphics, deltatracker) -> {
 		if(!NeoForge.EVENT_BUS.post(new RenderPsiHudEvent(PsiHudElementType.SOCKETABLE_EQUIPPED_NAME)).isCanceled()) {
 			renderSocketableEquippedName(graphics, deltatracker);
@@ -131,15 +146,9 @@ public final class HUDHandler {
 
 		boolean right = ConfigHandler.CLIENT.psiBarOnRight.get();
 
-		int pad = 3;
-		int width = 32;
-		int height = 140;
-
-		int x = -pad;
-		if(right) {
-			x = graphics.guiWidth() + pad - width;
-		}
-		int y = graphics.guiHeight() / 2 - height / 2;
+		// Optimized: Use pre-calculated constants
+		int x = right ? graphics.guiWidth() + PSI_BAR_PADDING - PSI_BAR_WIDTH : -PSI_BAR_PADDING;
+		int y = graphics.guiHeight() / 2 - PSI_BAR_HEIGHT / 2;
 
 		if(!registeredMask) {
 			RenderSystem.setShaderTexture(0, psiBarMask);
@@ -148,70 +157,68 @@ public final class HUDHandler {
 		}
 
 		RenderSystem.enableBlend();
-		graphics.blit(psiBar, x, y, 0, 0, width, height, 64, 256);
+		graphics.blit(psiBar, x, y, 0, 0, PSI_BAR_WIDTH, PSI_BAR_HEIGHT, 64, 256);
 
-		x += 8;
-		y += 26;
+		// Optimized: Use pre-calculated offsets
+		x += PSI_BAR_OFFSET_X;
+		y += PSI_BAR_OFFSET_Y;
 
-		width = 16;
-		height = 106;
+		// Optimized: Use constants for color calculation
+		float r = data.isOverflowed() ? PSI_BAR_OVERFLOW_R : PSI_BAR_R;
+		float g = data.isOverflowed() ? PSI_BAR_OVERFLOW_G : PSI_BAR_G;
+		float b = data.isOverflowed() ? PSI_BAR_OVERFLOW_B : PSI_BAR_B;
 
-		float r = 0.6F;
-		float g = 0.65F;
-		float b = 1F;
-
-		if(data.isOverflowed()) {
-			r = 1F;
-			g = 0.6F;
-			b = 0.6F;
-		}
-
-		int origHeight = height;
+		int origHeight = PSI_BAR_INNER_HEIGHT;
 		int origY = y;
 		int v = 0;
 
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
+		// Optimized: Batch deduction rendering with pre-calculated values
 		for(Deduction d : data.deductions) {
 			float a = d.getPercentile(deltatracker.getGameTimeDeltaPartialTick(false));
 			RenderSystem.setShaderColor(r, g, b, a);
-			height = (int) Math.ceil(origHeight * (double) d.deduct / totalPsi);
+			int height = (int) Math.ceil(origHeight * (double) d.deduct / totalPsi);
 			int effHeight = (int) (origHeight * (double) d.current / totalPsi);
-			v = origHeight - effHeight;
-			y = origY + v;
+			int deductV = origHeight - effHeight;
+			int renderY = origY + deductV;
 
 			usePsiBarShader(a, d.shatter, data.overflowed);
-			graphics.blit(psiBar, x, y, 32, v, width, height, 64, 256);
+			graphics.blit(psiBar, x, renderY, 32, deductV, PSI_BAR_INNER_WIDTH, height, 64, 256);
 		}
 
+		// Optimized: Simplified PSI bar main rendering
 		float textY = origY;
+		int mainHeight = 0;
+		int mainV = 0;
+		int mainRenderY = origY;
+
 		if(totalPsi > 0) {
-			height = (int) ((double) origHeight * (double) data.availablePsi / totalPsi);
-			v = origHeight - height;
-			y = origY + v;
+			mainHeight = (origHeight * data.availablePsi) / totalPsi;
+			mainV = origHeight - mainHeight;
+			mainRenderY = origY + mainV;
 
 			if(data.availablePsi != data.lastAvailablePsi) {
-				float textHeight = (float) (origHeight
-						* (data.availablePsi * deltatracker.getGameTimeDeltaPartialTick(false) + data.lastAvailablePsi * (1.0 - deltatracker.getGameTimeDeltaPartialTick(false))) / totalPsi);
+				float partialTick = deltatracker.getGameTimeDeltaPartialTick(false);
+				float interpolatedPsi = data.availablePsi * partialTick + data.lastAvailablePsi * (1.0F - partialTick);
+				float textHeight = (origHeight * interpolatedPsi) / totalPsi;
 				textY = origY + (origHeight - textHeight);
 			} else {
-				textY = y;
+				textY = mainRenderY;
 			}
-		} else {
-			height = 0;
 		}
 
 		RenderSystem.setShaderColor(r, g, b, 1F);
 		usePsiBarShader(1F, false, data.overflowed);
-		graphics.blit(psiBar, x, y, 32, v, width, height, 64, 256);
+		graphics.blit(psiBar, x, mainRenderY, 32, mainV, PSI_BAR_INNER_WIDTH, mainHeight, 64, 256);
 
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 
 		graphics.pose().pushPose();
 		graphics.pose().translate(0F, textY, 0F);
-		width = 44;
-		height = 3;
+		int barWidth = 44;
+		int barHeight = 3;
 
 		int storedPsi = cad.getStoredPsi(cadStack);
 
@@ -233,7 +240,7 @@ public final class HUDHandler {
 				PsiRenderHelper.g(color) / 255F,
 				PsiRenderHelper.b(color) / 255F, 1F);
 
-		graphics.blit(psiBar, x - offBar, -2, 0, 140, width, height, 64, 256);
+		graphics.blit(psiBar, x - offBar, -2, 0, 140, barWidth, barHeight, 64, 256);
 		graphics.drawString(mc.font, s1, x - offStr1, -11, 0xFFFFFF, true);
 		graphics.pose().popPose();
 

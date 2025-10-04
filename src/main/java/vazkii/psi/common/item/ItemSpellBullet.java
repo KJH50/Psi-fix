@@ -11,7 +11,6 @@ package vazkii.psi.common.item;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -34,8 +33,9 @@ import vazkii.psi.api.internal.TooltipHelper;
 import vazkii.psi.api.spell.ISpellAcceptor;
 import vazkii.psi.api.spell.Spell;
 import vazkii.psi.api.spell.SpellContext;
-import vazkii.psi.common.core.handler.PsiSoundHandler;
 import vazkii.psi.common.item.base.ModDataComponents;
+import vazkii.psi.common.util.DataComponentHelper;
+import vazkii.psi.common.util.SoundHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +67,7 @@ public class ItemSpellBullet extends Item {
 	@Override
 	public Component getName(@NotNull ItemStack stack) {
 		if(ISpellAcceptor.hasSpell(stack)) {
-			Spell cmp = stack.getOrDefault(ModDataComponents.SPELL, new Spell());
+			Spell cmp = DataComponentHelper.getSpell(stack);
 			String name = cmp.name;
 			if(name.isEmpty()) {
 				return super.getName(stack);
@@ -91,7 +91,7 @@ public class ItemSpellBullet extends Item {
 		ItemStack itemStackIn = playerIn.getItemInHand(hand);
 		if(ItemSpellDrive.getSpell(itemStackIn) != null && playerIn.isShiftKeyDown()) {
 			if(!worldIn.isClientSide) {
-				worldIn.playSound(null, playerIn.getX(), playerIn.getY(), playerIn.getZ(), PsiSoundHandler.compileError, SoundSource.PLAYERS, 0.5F, 1F);
+				SoundHelper.playCompileErrorSound(worldIn, playerIn);
 			} else {
 				playerIn.swing(hand);
 			}

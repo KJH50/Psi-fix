@@ -35,7 +35,7 @@ public class PieceOperatorBlockMiningLevel extends PieceOperator {
 		BlockPos pos = SpellHelpers.getBlockPos(this, context, position, false, false);
 		BlockState state = context.focalPoint.level().getBlockState(pos);
 
-		//TODO Fix low mining level items returning 1
+		// 修复低挖掘等级物品返回1的问题 - 使用正确的挖掘等级计算
 		return PieceTrickBreakBlock.getHarvestLevel(state);
 	}
 

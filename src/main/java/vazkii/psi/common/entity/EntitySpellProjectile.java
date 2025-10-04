@@ -33,6 +33,7 @@ import vazkii.psi.api.spell.ISpellAcceptor;
 import vazkii.psi.api.spell.Spell;
 import vazkii.psi.api.spell.SpellContext;
 import vazkii.psi.common.Psi;
+import vazkii.psi.common.lib.LibNBTTags;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,13 +42,6 @@ import java.util.function.Consumer;
 
 public class EntitySpellProjectile extends ThrowableProjectile {
 	protected static final EntityDataAccessor<Optional<UUID>> ATTACKTARGET_UUID = SynchedEntityData.defineId(EntitySpellProjectile.class, EntityDataSerializers.OPTIONAL_UUID);
-	private static final String TAG_COLORIZER = "colorizer";
-	private static final String TAG_BULLET = "bullet";
-	private static final String TAG_TIME_ALIVE = "timeAlive";
-
-	private static final String TAG_LAST_MOTION_X = "lastMotionX";
-	private static final String TAG_LAST_MOTION_Y = "lastMotionY";
-	private static final String TAG_LAST_MOTION_Z = "lastMotionZ";
 
 	private static final EntityDataAccessor<ItemStack> COLORIZER_DATA = SynchedEntityData.defineId(EntitySpellProjectile.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<ItemStack> BULLET_DATA = SynchedEntityData.defineId(EntitySpellProjectile.class, EntityDataSerializers.ITEM_STACK);
@@ -100,31 +94,31 @@ public class EntitySpellProjectile extends ThrowableProjectile {
 		if(!colorizer.isEmpty()) {
 			colorizerCmp = colorizer.save(this.registryAccess(), colorizerCmp);
 		}
-		tagCompound.put(TAG_COLORIZER, colorizerCmp);
+		tagCompound.put(LibNBTTags.TAG_COLORIZER, colorizerCmp);
 
 		Tag bulletCmp = new CompoundTag();
 		ItemStack bullet = entityData.get(BULLET_DATA);
 		if(!bullet.isEmpty()) {
 			bulletCmp = bullet.save(this.registryAccess(), bulletCmp);
 		}
-		tagCompound.put(TAG_BULLET, bulletCmp);
+		tagCompound.put(LibNBTTags.TAG_BULLET, bulletCmp);
 
-		tagCompound.putInt(TAG_TIME_ALIVE, timeAlive);
+		tagCompound.putInt(LibNBTTags.TAG_TIME_ALIVE, timeAlive);
 
-		tagCompound.putDouble(TAG_LAST_MOTION_X, getDeltaMovement().x());
-		tagCompound.putDouble(TAG_LAST_MOTION_Y, getDeltaMovement().y());
-		tagCompound.putDouble(TAG_LAST_MOTION_Z, getDeltaMovement().z());
+		tagCompound.putDouble(LibNBTTags.TAG_LAST_MOTION_X, getDeltaMovement().x());
+		tagCompound.putDouble(LibNBTTags.TAG_LAST_MOTION_Y, getDeltaMovement().y());
+		tagCompound.putDouble(LibNBTTags.TAG_LAST_MOTION_Z, getDeltaMovement().z());
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag tagCompound) {
 		super.readAdditionalSaveData(tagCompound);
 
-		CompoundTag colorizerCmp = tagCompound.getCompound(TAG_COLORIZER);
+		CompoundTag colorizerCmp = tagCompound.getCompound(LibNBTTags.TAG_COLORIZER);
 		ItemStack colorizer = ItemStack.parseOptional(this.registryAccess(), colorizerCmp);
 		entityData.set(COLORIZER_DATA, colorizer);
 
-		CompoundTag bulletCmp = tagCompound.getCompound(TAG_BULLET);
+		CompoundTag bulletCmp = tagCompound.getCompound(LibNBTTags.TAG_BULLET);
 		ItemStack bullet = ItemStack.parseOptional(this.registryAccess(), bulletCmp);
 		entityData.set(BULLET_DATA, bullet);
 
@@ -133,11 +127,11 @@ public class EntitySpellProjectile extends ThrowableProjectile {
 			entityData.set(CASTER_UUID, Optional.of(thrower.getUUID()));
 		}
 
-		timeAlive = tagCompound.getInt(TAG_TIME_ALIVE);
+		timeAlive = tagCompound.getInt(LibNBTTags.TAG_TIME_ALIVE);
 
-		double lastMotionX = tagCompound.getDouble(TAG_LAST_MOTION_X);
-		double lastMotionY = tagCompound.getDouble(TAG_LAST_MOTION_Y);
-		double lastMotionZ = tagCompound.getDouble(TAG_LAST_MOTION_Z);
+		double lastMotionX = tagCompound.getDouble(LibNBTTags.TAG_LAST_MOTION_X);
+		double lastMotionY = tagCompound.getDouble(LibNBTTags.TAG_LAST_MOTION_Y);
+		double lastMotionZ = tagCompound.getDouble(LibNBTTags.TAG_LAST_MOTION_Z);
 		setDeltaMovement(lastMotionX, lastMotionY, lastMotionZ);
 	}
 

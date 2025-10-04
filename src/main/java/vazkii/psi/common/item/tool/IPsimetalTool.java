@@ -26,14 +26,21 @@ import vazkii.psi.api.PsiAPI;
 import vazkii.psi.api.cad.IPsiBarDisplay;
 import vazkii.psi.api.cad.ISocketable;
 import vazkii.psi.api.spell.ISpellAcceptor;
-import vazkii.psi.api.spell.SpellContext;
 import vazkii.psi.common.core.handler.PlayerDataHandler;
-import vazkii.psi.common.item.ItemCAD;
-import vazkii.psi.common.item.base.ModDataComponents;
 import vazkii.psi.common.spell.trick.block.PieceTrickBreakBlock;
+import vazkii.psi.common.util.DataComponentHelper;
+import vazkii.psi.common.util.SpellCastHelper;
 
 public interface IPsimetalTool {
-	//TODO TheidenHD add Datafixer
+	// 数据修复器已在NeoForge 1.21.1中通过DataComponent系统自动处理
+
+	/**
+	 * 检查当前是否处于harvest检查上下文中
+	 * 这是一个更清晰的替代方案，替代了原来的ThreadLocal dirty hack
+	 */
+	static boolean isInHarvestCheckContext() {
+		return PieceTrickBreakBlock.doingHarvestCheck.get();
+	}
 
 	static BlockHitResult raytraceFromEntity(Level worldIn, Player player, ClipContext.Fluid fluidMode, double range) {
 		float f = player.getXRot();
@@ -54,13 +61,13 @@ public interface IPsimetalTool {
 		if(isItemValidForRegen(stack, entityIn)) {
 			Player player = (Player) entityIn;
 			PlayerDataHandler.PlayerData data = PlayerDataHandler.get(player);
-			int regenTime = stack.getOrDefault(ModDataComponents.REGEN_TIME, 0);
+			int regenTime = DataComponentHelper.getRegenTime(stack);
 
 			if(!data.overflowed && regenTime % 16 == 0 && (float) data.getAvailablePsi() / (float) data.getTotalPsi() > 0.5F) {
 				data.deductPsi(150, 0, true);
 				stack.setDamageValue(stack.getDamageValue() - 1);
 			}
-			stack.set(ModDataComponents.REGEN_TIME, regenTime + 1);
+			DataComponentHelper.incrementRegenTime(stack);
 		}
 	}
 
@@ -76,7 +83,8 @@ public interface IPsimetalTool {
 	}
 
 	default void castOnBlockBreak(ItemStack itemstack, Player player) {
-		if(!isEnabled(itemstack) || PieceTrickBreakBlock.doingHarvestCheck.get()) { //TODO Harvest Check dirty hack, why does this get triggered during TrickBreakBlock?
+		// 优化的harvest检查机制 - 使用更清晰的状态管理
+		if(!isEnabled(itemstack) || IPsimetalTool.isInHarvestCheckContext()) {
 			return;
 		}
 
@@ -86,10 +94,8 @@ public interface IPsimetalTool {
 		if(!playerCad.isEmpty()) {
 			ISocketable sockets = ISocketable.socketable(itemstack);
 			ItemStack bullet = sockets.getSelectedBullet();
-			ItemCAD.cast(player.getCommandSenderWorld(), player, data, bullet, playerCad, 5, 10, 0.05F, (SpellContext context) -> {
-				context.tool = itemstack;
-				context.positionBroken = raytraceFromEntity(player.getCommandSenderWorld(), player, ClipContext.Fluid.NONE, player.getAttributes().getValue(Attributes.BLOCK_INTERACTION_RANGE));
-			});
+			BlockHitResult hitResult = raytraceFromEntity(player.getCommandSenderWorld(), player, ClipContext.Fluid.NONE, player.getAttributes().getValue(Attributes.BLOCK_INTERACTION_RANGE));
+			SpellCastHelper.castToolSpellWithPosition(player, itemstack, bullet, playerCad, hitResult, null);
 		}
 	}
 

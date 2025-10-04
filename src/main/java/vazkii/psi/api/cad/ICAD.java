@@ -21,6 +21,7 @@ import vazkii.psi.api.internal.Vector3;
 import vazkii.psi.api.spell.SpellRuntimeException;
 import vazkii.psi.api.spell.piece.PieceCraftingTrick;
 import vazkii.psi.common.item.base.ModDataComponents;
+import vazkii.psi.common.util.DataComponentHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +39,7 @@ public interface ICAD {
 
 	static void setComponent(ItemStack stack, ItemStack componentStack) {
 		@Nullable
-		List<Item> items = stack.getOrDefault(ModDataComponents.COMPONENTS, new ArrayList<>(Collections.nCopies(EnumCADComponent.values().length, Items.AIR)));
+		List<Item> items = DataComponentHelper.getCADComponents(stack);
 		if(!componentStack.isEmpty() && componentStack.getItem() instanceof ICADComponent component) {
 			if(!(items instanceof ArrayList<Item>)) {
 				items = new ArrayList<>(items);
@@ -46,7 +47,7 @@ public interface ICAD {
 
 			EnumCADComponent componentType = component.getComponentType(componentStack);
 			items.set(componentType.ordinal(), componentStack.getItem());
-			stack.set(ModDataComponents.COMPONENTS, items);
+			DataComponentHelper.setCADComponents(stack, items);
 		}
 	}
 

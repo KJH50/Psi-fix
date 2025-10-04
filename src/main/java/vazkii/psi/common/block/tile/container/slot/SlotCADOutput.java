@@ -8,10 +8,7 @@
  */
 package vazkii.psi.common.block.tile.container.slot;
 
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
@@ -24,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import vazkii.psi.api.cad.CADTakeEvent;
 import vazkii.psi.common.block.tile.TileCADAssembler;
 import vazkii.psi.common.core.handler.PsiSoundHandler;
+import vazkii.psi.common.util.MessageHelper;
 
 public class SlotCADOutput extends Slot {
 
@@ -44,15 +42,14 @@ public class SlotCADOutput extends Slot {
 
 	@Override
 	public boolean mayPickup(Player playerIn) {
+		// 恢复原先的合成机制，移除合成栏位物品检查
 		CADTakeEvent event = new CADTakeEvent(getItem(), assembler, playerIn);
 		float sound = event.getSound();
 		if(NeoForge.EVENT_BUS.post(event).isCanceled()) {
 			BlockPos assemblerPos = this.assembler.getBlockPos();
 			String cancelMessage = event.getCancellationMessage();
 			if(!playerIn.level().isClientSide) {
-				if(cancelMessage != null && !cancelMessage.isEmpty()) {
-					playerIn.sendSystemMessage(Component.translatable(cancelMessage).setStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
-				}
+				MessageHelper.sendCancelMessageIfPresent(playerIn, cancelMessage);
 				playerIn.level().playSound(null, assemblerPos.getX(), assemblerPos.getY(), assemblerPos.getZ(), PsiSoundHandler.compileError, SoundSource.BLOCKS, sound, 1F);
 			}
 			return false;

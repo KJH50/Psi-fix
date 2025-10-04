@@ -44,7 +44,7 @@ public class TrickCraftingCategory implements IRecipeCategory<ITrickRecipe> {
 	private static final int trickX = 43;
 	private static final int trickY = 24;
 
-	private final Map<ResourceLocation, IDrawable> trickIcons = new HashMap<>();
+	private final Map<ResourceLocation, IDrawable> trickIcons = new HashMap<>(32);
 
 	private final IDrawable background;
 	private final IDrawable icon;
@@ -103,7 +103,7 @@ public class TrickCraftingCategory implements IRecipeCategory<ITrickRecipe> {
 	@Override
 	public void getTooltip(ITooltipBuilder tooltip, ITrickRecipe recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
 		if(recipe.getPiece() != null && onTrick(mouseX, mouseY)) {
-			List<Component> tooltips = new ArrayList<>();
+			List<Component> tooltips = new ArrayList<>(8);
 			recipe.getPiece().getTooltip(tooltips);
 			tooltip.addAll(tooltips);
 		}

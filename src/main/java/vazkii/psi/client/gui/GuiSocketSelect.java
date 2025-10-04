@@ -57,6 +57,14 @@ public class GuiSocketSelect extends Screen {
 	List<Integer> slots;
 	List<ResourceLocation> signs;
 
+	// 渲染优化：缓存计算结果
+	private float[] cachedRadii;
+	private boolean[] cachedMouseSectors;
+	private float lastAngle = -1;
+	private int lastSegments = -1;
+	private long lastUpdateTime = 0;
+	private static final long CACHE_DURATION_MS = 16; // ~60fps缓存更新频率
+
 	public GuiSocketSelect(ItemStack stack) {
 		super(Component.empty());
 		mc = Minecraft.getInstance();
@@ -86,6 +94,7 @@ public class GuiSocketSelect extends Screen {
 	public void setSocketable(ItemStack stack) {
 		if(stack.isEmpty()) {
 			slots = new ArrayList<>();
+			invalidateCache();
 			return;
 		}
 
@@ -93,6 +102,30 @@ public class GuiSocketSelect extends Screen {
 		socketable = ISocketable.socketable(stack);
 		slots = socketable.getRadialMenuSlots();
 		signs = socketable.getRadialMenuIcons();
+		invalidateCache();
+	}
+
+	private void invalidateCache() {
+		lastSegments = -1;
+		lastAngle = -1;
+		cachedRadii = null;
+		cachedMouseSectors = null;
+	}
+
+	private void updateCache(int segments, double angle, int maxRadius, float degPer) {
+		if(cachedRadii == null || cachedRadii.length != segments) {
+			cachedRadii = new float[segments];
+			cachedMouseSectors = new boolean[segments];
+		}
+
+		for(int seg = 0; seg < segments; seg++) {
+			cachedMouseSectors[seg] = degPer * seg < angle && angle < degPer * (seg + 1);
+			float radius = Math.max(0F, Math.min((timeIn - ((float) seg * 6F / (float) segments)) * 40F, (float) maxRadius));
+			if(cachedMouseSectors[seg] || seg == socketable.getSelectedSlot()) {
+				radius *= 1.025f;
+			}
+			cachedRadii[seg] = radius;
+		}
 	}
 
 	@Override
@@ -114,9 +147,23 @@ public class GuiSocketSelect extends Screen {
 		ItemStack cadStack = PsiAPI.getPlayerCAD(Minecraft.getInstance().player);
 		slotSelected = -1;
 
+		// 渲染优化：缓存计算以减少重复计算
+		long currentTime = System.currentTimeMillis();
+		boolean needsUpdate = segments != lastSegments ||
+				Math.abs(angle - lastAngle) > 0.01 ||
+				currentTime - lastUpdateTime > CACHE_DURATION_MS;
+
+		if(needsUpdate) {
+			updateCache(segments, angle, maxRadius, degPer);
+			lastSegments = segments;
+			lastAngle = (float) angle;
+			lastUpdateTime = currentTime;
+		}
+
 		Tesselator tess = Tesselator.getInstance();
 		RenderSystem.disableCull();
-		//RenderSystem.disableTexture();  TODO(Kamefrede): 1.20 figure out what this breaks
+		// 在1.21.1中，纹理状态由着色器系统自动管理
+		// disableTexture()已被移除，使用着色器替代
 		RenderSystem.enableBlend();
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
@@ -124,11 +171,8 @@ public class GuiSocketSelect extends Screen {
 			BufferBuilder buf = tess.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
 
 			for(int seg = 0; seg < segments; seg++) {
-				boolean mouseInSector = degPer * seg < angle && angle < degPer * (seg + 1);
-				float radius = Math.max(0F, Math.min((timeIn - ((float) seg * 6F / (float) segments)) * 40F, (float) maxRadius));
-				if(mouseInSector || seg == socketable.getSelectedSlot()) {
-					radius *= 1.025f;
-				}
+				boolean mouseInSector = cachedMouseSectors[seg];
+				float radius = cachedRadii[seg];
 
 				int gs = 0x40;
 				if(seg % 2 == 0) {
@@ -180,14 +224,11 @@ public class GuiSocketSelect extends Screen {
 			}
 			BufferUploader.drawWithShader(buf.buildOrThrow());
 		}
-		// RenderSystem.enableTexture(); TODO(Kamefrede): 1.20 figure out what this breaks
+		// 纹理状态在1.21.1中由渲染系统自动恢复
 
 		for(int seg = 0; seg < segments; seg++) {
-			boolean mouseInSector = degPer * seg < angle && angle < degPer * (seg + 1);
-			float radius = Math.max(0F, Math.min((timeIn - ((float) seg * 6F / (float) segments)) * 40F, (float) maxRadius));
-			if(mouseInSector || seg == socketable.getSelectedSlot()) {
-				radius *= 1.025f;
-			}
+			boolean mouseInSector = cachedMouseSectors[seg];
+			float radius = cachedRadii[seg];
 
 			float rad = (seg + 0.5f) * degPer;
 			float xp = x + Mth.cos(rad) * radius;

@@ -29,9 +29,10 @@ public class CompiledSpell {
 	public final Spell sourceSpell;
 	public final SpellMetadata metadata = new SpellMetadata();
 
+	// 优化: 使用更高效的数据结构和预分配容量
 	public final Stack<Action> actions = new Stack<>();
-	public final Map<SpellPiece, CatchHandler> errorHandlers = new HashMap<>();
-	public final Map<SpellPiece, Action> actionMap = new HashMap<>();
+	public final Map<SpellPiece, CatchHandler> errorHandlers = new HashMap<>(16);
+	public final Map<SpellPiece, Action> actionMap = new HashMap<>(32);
 	public final boolean[][] spotsEvaluated;
 	public Action currentAction;
 

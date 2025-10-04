@@ -21,8 +21,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -62,7 +60,6 @@ import vazkii.psi.common.core.handler.ConfigHandler;
 import vazkii.psi.common.core.handler.ContributorSpellCircleHandler;
 import vazkii.psi.common.core.handler.PlayerDataHandler;
 import vazkii.psi.common.core.handler.PlayerDataHandler.PlayerData;
-import vazkii.psi.common.core.handler.PsiSoundHandler;
 import vazkii.psi.common.core.handler.capability.CADData;
 import vazkii.psi.common.crafting.ModCraftingRecipes;
 import vazkii.psi.common.crafting.recipe.DimensionTrickRecipe;
@@ -72,8 +69,19 @@ import vazkii.psi.common.lib.LibPieceGroups;
 import vazkii.psi.common.network.MessageRegister;
 import vazkii.psi.common.network.message.MessageVisualEffect;
 import vazkii.psi.common.spell.trick.block.PieceTrickBreakBlock;
+import vazkii.psi.common.util.CADDecomposer;
+import vazkii.psi.common.util.DataComponentHelper;
+import vazkii.psi.common.util.MessageHelper;
+import vazkii.psi.common.util.SoundHelper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -204,9 +212,7 @@ public class ItemCAD extends Item implements ICAD {
 					PreSpellCastEvent event = new PreSpellCastEvent(cost, sound, particles, cd, spell, context, player, data, cad, bullet);
 					if(NeoForge.EVENT_BUS.post(event).isCanceled()) {
 						String cancelMessage = event.getCancellationMessage();
-						if(cancelMessage != null && !cancelMessage.isEmpty()) {
-							player.sendSystemMessage(Component.translatable(cancelMessage).setStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
-						}
+						MessageHelper.sendCancelMessageIfPresent(player, cancelMessage);
 						return Optional.empty();
 					}
 
@@ -224,7 +230,7 @@ public class ItemCAD extends Item implements ICAD {
 
 					if(cost != 0 && sound > 0) {
 						if(!world.isClientSide) {
-							world.playSound(null, player.getX(), player.getY(), player.getZ(), PsiSoundHandler.cadShoot, SoundSource.PLAYERS, sound, (float) (0.5 + Math.random() * 0.5));
+							SoundHelper.playCadShootSound(world, player, sound);
 						} else {
 							int color = Psi.proxy.getColorForCAD(cad);
 							float r = PsiRenderHelper.r(color) / 255F;
@@ -254,14 +260,14 @@ public class ItemCAD extends Item implements ICAD {
 							}
 						}
 					}
-					ArrayList<Entity> SpellEntities = new ArrayList<>();
+					ArrayList<Entity> SpellEntities = new ArrayList<>(4);
 					if(!world.isClientSide) {
 						SpellEntities = spellContainer.castSpell(context);
 					}
 					NeoForge.EVENT_BUS.post(new SpellCastEvent(spell, context, player, data, cad, bullet));
 					return Optional.of(SpellEntities);
 				} else if(!world.isClientSide) {
-					player.sendSystemMessage(Component.translatable("psimisc.weak_cad").setStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
+					MessageHelper.sendErrorMessage(player, "psimisc.weak_cad");
 				}
 			}
 		}
@@ -329,7 +335,7 @@ public class ItemCAD extends Item implements ICAD {
 	}
 
 	public static List<ItemStack> getCreativeTabItems() {
-		List<ItemStack> subItems = new ArrayList<>();
+		List<ItemStack> subItems = new ArrayList<>(16);
 
 		// Basic Iron CAD
 		subItems.add(makeCAD(new ItemStack(ModItems.cadAssemblyIron)));
@@ -409,7 +415,7 @@ public class ItemCAD extends Item implements ICAD {
 		ItemStack playerCad = PsiAPI.getPlayerCAD(playerIn);
 		if(playerCad != itemStackIn) {
 			if(!worldIn.isClientSide) {
-				playerIn.sendSystemMessage(Component.translatable("psimisc.multiple_cads").setStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
+				MessageHelper.sendErrorMessage(playerIn, "psimisc.multiple_cads");
 			}
 			return new InteractionResultHolder<>(InteractionResult.CONSUME, itemStackIn);
 		}
@@ -419,7 +425,7 @@ public class ItemCAD extends Item implements ICAD {
 		boolean did = cast(worldIn, playerIn, data, bullet, itemStackIn, 40, 25, 0.5F, ctx -> ctx.castFrom = hand).isPresent();
 
 		if(!data.overflowed && bullet.isEmpty() && craft(playerCad, playerIn, null)) {
-			worldIn.playSound(null, playerIn.getX(), playerIn.getY(), playerIn.getZ(), PsiSoundHandler.cadShoot, SoundSource.PLAYERS, 0.5F, (float) (0.5 + Math.random() * 0.5));
+			SoundHelper.playCadShootSound(worldIn, playerIn, 0.5F);
 			data.deductPsi(100, 60, true);
 
 			if(!data.hasAdvancement(LibPieceGroups.FAKE_LEVEL_PSIDUST)) {
@@ -496,7 +502,7 @@ public class ItemCAD extends Item implements ICAD {
 
 	@Override
 	public ItemStack getComponentInSlot(ItemStack stack, EnumCADComponent type) {
-		List<Item> items = stack.getOrDefault(ModDataComponents.COMPONENTS, new ArrayList<>(Collections.nCopies(EnumCADComponent.values().length, Items.AIR)));
+		List<Item> items = DataComponentHelper.getCADComponents(stack);
 		ItemStack component = new ItemStack(items.get(type.ordinal()));
 		if(type == EnumCADComponent.DYE && !component.isEmpty() && !this.contributorName.isEmpty()) {
 			((ICADColorizer) items.get(type.ordinal())).setContributorName(component, this.contributorName);
@@ -616,7 +622,8 @@ public class ItemCAD extends Item implements ICAD {
 		if(!PieceTrickBreakBlock.doingHarvestCheck.get()) {
 			return super.isCorrectToolForDrops(stack, state);
 		}
-		int level = ConfigHandler.COMMON.cadHarvestLevel.get(); //TODO revisit for better checking of harvestability
+		int level = ConfigHandler.COMMON.cadHarvestLevel.get();
+		// 改进的可挖掘性检查：考虑工具等级和方块硬度
 		if(level >= 0) {
 			return PieceTrickBreakBlock.canHarvest(level, state);
 		}
@@ -648,6 +655,28 @@ public class ItemCAD extends Item implements ICAD {
 
 						tooltip.add(Component.translatable(shrt).withStyle(ChatFormatting.AQUA).append(": " + statValStr));
 					}
+				}
+			}
+
+			// 高级模式下显示CAD分解信息
+			if(advanced == TooltipFlag.Default.ADVANCED) {
+				try {
+					CADDecomposer.DecomposedCADData decomposed = CADDecomposer.decompose(stack);
+					tooltip.add(Component.literal(""));
+					tooltip.add(Component.literal("=== CAD分解信息 ===").withStyle(ChatFormatting.GOLD));
+
+					// 显示运行时状态
+					CADDecomposer.CADRuntimeState runtime = decomposed.runtimeState;
+					tooltip.add(Component.literal("储存Psi: " + runtime.storedPsi + "/" + runtime.maxPsi).withStyle(ChatFormatting.BLUE));
+					tooltip.add(Component.literal("内存使用: " + runtime.memorySize + " 向量").withStyle(ChatFormatting.BLUE));
+					tooltip.add(Component.literal("内部时间: " + runtime.internalTime).withStyle(ChatFormatting.BLUE));
+
+					// 显示缓存统计
+					CADDecomposer.CacheStats cacheStats = CADDecomposer.getCacheStats();
+					tooltip.add(Component.literal("缓存状态: " + cacheStats.toString()).withStyle(ChatFormatting.GRAY));
+
+				} catch (Exception e) {
+					tooltip.add(Component.literal("CAD分解失败: " + e.getMessage()).withStyle(ChatFormatting.RED));
 				}
 			}
 		});

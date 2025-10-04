@@ -217,7 +217,7 @@ public final class SpellContext {
 	 * @throws SpellRuntimeException NO_CAD
 	 */
 	public ItemStack getHarvestTool() throws SpellRuntimeException {
-		if(!tool.isEmpty()) { //TODO Armor
+		if(!tool.isEmpty()) { // Note: Armor support may be added in future versions
 			return tool;
 		}
 

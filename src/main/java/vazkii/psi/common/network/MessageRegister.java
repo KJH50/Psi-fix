@@ -42,20 +42,15 @@ public class MessageRegister {
 				.optional();
 		registrar.playBidirectional(MessageAdditiveMotion.TYPE, MessageAdditiveMotion.CODEC, MessageAdditiveMotion::handle);
 		registrar.playBidirectional(MessageBlink.TYPE, MessageBlink.CODEC, MessageBlink::handle);
-		registrar.playBidirectional(MessageChangeControllerSlot.TYPE, MessageChangeControllerSlot.CODEC, MessageChangeControllerSlot::handle);
 		registrar.playBidirectional(MessageChangeSocketableSlot.TYPE, MessageChangeSocketableSlot.CODEC, MessageChangeSocketableSlot::handle);
 		registrar.playBidirectional(MessageDataSync.TYPE, MessageDataSync.CODEC, MessageDataSync::handle);
 		registrar.playBidirectional(MessageDeductPsi.TYPE, MessageDeductPsi.CODEC, MessageDeductPsi::handle);
 		registrar.playBidirectional(MessageEidosSync.TYPE, MessageEidosSync.CODEC, MessageEidosSync::handle);
 		registrar.playBidirectional(MessageLoopcastSync.TYPE, MessageLoopcastSync.CODEC, MessageLoopcastSync::handle);
-		registrar.playBidirectional(MessageParticleTrail.TYPE, MessageParticleTrail.CODEC, MessageParticleTrail::handle);
-		registrar.playBidirectional(MessageSpamlessChat.TYPE, MessageSpamlessChat.CODEC, MessageSpamlessChat::handle);
-		registrar.playBidirectional(MessageSpellError.TYPE, MessageSpellError.CODEC, MessageSpellError::handle);
 		registrar.playBidirectional(MessageSpellModified.TYPE, MessageSpellModified.CODEC, MessageSpellModified::handle);
-		registrar.playBidirectional(MessageFlashRingSync.TYPE, MessageFlashRingSync.CODEC, MessageFlashRingSync::handle);
 		registrar.playBidirectional(MessageTriggerJumpSpell.TYPE, MessageTriggerJumpSpell.CODEC, MessageTriggerJumpSpell::handle);
 		registrar.playBidirectional(MessageVisualEffect.TYPE, MessageVisualEffect.CODEC, MessageVisualEffect::handle);
-
+		registrar.playBidirectional(MessageCADDisassembly.TYPE, MessageCADDisassembly.CODEC, MessageCADDisassembly::handle);
 	}
 
 	public static <MSG extends CustomPacketPayload> void sendToServer(MSG message) {
@@ -64,6 +59,18 @@ public class MessageRegister {
 
 	public static <MSG extends CustomPacketPayload> void sendToPlayer(ServerPlayer player, MSG message) {
 		PacketDistributor.sendToPlayer(player, message);
+	}
+
+	public static <MSG extends CustomPacketPayload> void sendToAllPlayers(MSG message, ServerLevel level) {
+		PacketDistributor.sendToAllPlayers(message);
+	}
+
+	public static <MSG extends CustomPacketPayload> void sendToPlayersNear(MSG message, ServerLevel level, Vec3 pos, double range) {
+		for(ServerPlayer player : level.players()) {
+			if(player.distanceToSqr(pos) <= range * range) {
+				PacketDistributor.sendToPlayer(player, message);
+			}
+		}
 	}
 
 	public static <MSG extends CustomPacketPayload> void sendToPlayersTrackingEntity(Entity entity, MSG message) {
@@ -75,6 +82,6 @@ public class MessageRegister {
 	}
 
 	public static <MSG extends CustomPacketPayload> void sendToPlayersInDimension(ServerLevel level, MSG message) {
-		PacketDistributor.sendToPlayersInDimension(level, message);
+		PacketDistributor.sendToAllPlayers(message);
 	}
 }

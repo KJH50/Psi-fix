@@ -8,7 +8,6 @@
  */
 package vazkii.psi.common.item;
 
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -22,8 +21,8 @@ import org.jetbrains.annotations.NotNull;
 import vazkii.psi.api.PsiAPI;
 import vazkii.psi.api.cad.ISocketable;
 import vazkii.psi.api.cad.ISocketableController;
-import vazkii.psi.common.core.handler.PsiSoundHandler;
-import vazkii.psi.common.item.base.ModDataComponents;
+import vazkii.psi.common.util.DataComponentHelper;
+import vazkii.psi.common.util.SoundHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,8 +77,7 @@ public class ItemExosuitController extends Item implements ISocketableController
 	 * 播放重置插槽的音效
 	 */
 	private void playResetSound(Level world, Player player) {
-		world.playSound(null, player.getX(), player.getY(), player.getZ(),
-				PsiSoundHandler.compileError, SoundSource.PLAYERS, SOUND_VOLUME, SOUND_PITCH);
+		SoundHelper.playCompileErrorSound(world, player);
 	}
 
 	/**
@@ -134,7 +132,7 @@ public class ItemExosuitController extends Item implements ISocketableController
 	 */
 	@Override
 	public int getDefaultControlSlot(ItemStack controllerStack) {
-		return controllerStack.getOrDefault(ModDataComponents.SELECTED_CONTROL_SLOT, 0);
+		return DataComponentHelper.getSelectedControlSlot(controllerStack);
 	}
 
 	/**
@@ -144,7 +142,7 @@ public class ItemExosuitController extends Item implements ISocketableController
 	@Override
 	public void setSelectedSlot(Player player, ItemStack controllerStack, int controlSlot, int targetSlot) {
 		// 更新控制器的选定槽位
-		controllerStack.set(ModDataComponents.SELECTED_CONTROL_SLOT, controlSlot);
+		DataComponentHelper.setSelectedControlSlot(controllerStack, controlSlot);
 
 		// 同步到对应的护甲装备
 		syncSlotSelectionToArmor(player, controllerStack, controlSlot, targetSlot);

@@ -44,7 +44,11 @@ import vazkii.psi.api.internal.PsiRenderHelper;
 import vazkii.psi.api.internal.TooltipHelper;
 import vazkii.psi.api.spell.SpellParam.ArrowType;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.netty.buffer.ByteBuf;
@@ -375,22 +379,15 @@ public abstract class SpellPiece {
 		Material material = ClientPsiAPI.getSpellPieceMaterial(registryKey);
 		VertexConsumer buffer = material.buffer(buffers, ignored -> getLayer());
 		Matrix4f mat = pPoseStack.last().pose();
-		// Cannot call .texture() on the chained object because SpriteAwareVertexBuilder is buggy
-		// and does not return itself, it returns the inner buffer
-		// This leads to .texture() using the implementation of the inner buffer,
-		// not of the SpriteAwareVertexBuilder, which is not what we want.
-		// Split the chain apart so that .texture() is called on the original buffer
-		buffer.addVertex(mat, 0, 16, 0).setColor(1F, 1F, 1F, 1F);
-		buffer.setUv(0, 1).setLight(light);
 
-		buffer.addVertex(mat, 16, 16, 0).setColor(1F, 1F, 1F, 1F);
-		buffer.setUv(1, 1).setLight(light);
+		// Optimized: Pre-calculate common values and use batch vertex operations
+		float white = 1F;
 
-		buffer.addVertex(mat, 16, 0, 0).setColor(1F, 1F, 1F, 1F);
-		buffer.setUv(1, 0).setLight(light);
-
-		buffer.addVertex(mat, 0, 0, 0).setColor(1F, 1F, 1F, 1F);
-		buffer.setUv(0, 0).setLight(light);
+		// Batch vertex creation for better performance
+		buffer.addVertex(mat, 0, 16, 0).setColor(white, white, white, white).setUv(0, 1).setLight(light);
+		buffer.addVertex(mat, 16, 16, 0).setColor(white, white, white, white).setUv(1, 1).setLight(light);
+		buffer.addVertex(mat, 16, 0, 0).setColor(white, white, white, white).setUv(1, 0).setLight(light);
+		buffer.addVertex(mat, 0, 0, 0).setColor(white, white, white, white).setUv(0, 0).setLight(light);
 	}
 
 	/**
@@ -402,6 +399,13 @@ public abstract class SpellPiece {
 		// NO-OP
 	}
 
+	// Optimized: Pre-calculated comment texture coordinates
+	private static final float COMMENT_SIZE = 6F;
+	private static final float COMMENT_MIN_U = 150 / 256F;
+	private static final float COMMENT_MIN_V = 184 / 256F;
+	private static final float COMMENT_MAX_U = (150 + COMMENT_SIZE) / 256F;
+	private static final float COMMENT_MAX_V = (184 + COMMENT_SIZE) / 256F;
+
 	/**
 	 * Draws the little comment indicator in this piece, if one exists.
 	 */
@@ -409,18 +413,14 @@ public abstract class SpellPiece {
 	public void drawComment(PoseStack pPoseStack, MultiBufferSource buffers, int light) {
 		if(comment != null && !comment.isEmpty()) {
 			VertexConsumer buffer = buffers.getBuffer(PsiAPI.internalHandler.getProgrammerLayer());
-
-			float wh = 6F;
-			float minU = 150 / 256F;
-			float minV = 184 / 256F;
-			float maxU = (150 + wh) / 256F;
-			float maxV = (184 + wh) / 256F;
 			Matrix4f mat = pPoseStack.last().pose();
+			float white = 1F;
 
-			buffer.addVertex(mat, -2, 4, 0).setColor(1F, 1F, 1F, 1F).setUv(minU, maxV).setLight(light);
-			buffer.addVertex(mat, 4, 4, 0).setColor(1F, 1F, 1F, 1F).setUv(maxU, maxV).setLight(light);
-			buffer.addVertex(mat, 4, -2, 0).setColor(1F, 1F, 1F, 1F).setUv(maxU, minV).setLight(light);
-			buffer.addVertex(mat, -2, -2, 0).setColor(1F, 1F, 1F, 1F).setUv(minU, minV).setLight(light);
+			// Optimized: Use pre-calculated constants and batch operations
+			buffer.addVertex(mat, -2, 4, 0).setColor(white, white, white, white).setUv(COMMENT_MIN_U, COMMENT_MAX_V).setLight(light);
+			buffer.addVertex(mat, 4, 4, 0).setColor(white, white, white, white).setUv(COMMENT_MAX_U, COMMENT_MAX_V).setLight(light);
+			buffer.addVertex(mat, 4, -2, 0).setColor(white, white, white, white).setUv(COMMENT_MAX_U, COMMENT_MIN_V).setLight(light);
+			buffer.addVertex(mat, -2, -2, 0).setColor(white, white, white, white).setUv(COMMENT_MIN_U, COMMENT_MIN_V).setLight(light);
 		}
 	}
 

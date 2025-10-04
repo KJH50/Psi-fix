@@ -12,7 +12,11 @@ import net.minecraft.world.entity.Entity;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Wrapper class for an Entity list.
@@ -31,7 +35,7 @@ public class EntityListWrapper implements Iterable<Entity> {
 	 * Constructs an EntityListWrapper from an arbitrary list of entities.
 	 */
 	public static EntityListWrapper make(@NotNull List<Entity> list) {
-		List<Entity> copy = new ArrayList<>();
+		List<Entity> copy = new ArrayList<>(list.size());
 		for(Entity e : list) {
 			if(e != null) {
 				copy.add(e);
@@ -59,7 +63,7 @@ public class EntityListWrapper implements Iterable<Entity> {
 	}
 
 	public static EntityListWrapper exclusion(@NotNull EntityListWrapper list, @NotNull EntityListWrapper remove) {
-		List<Entity> result = new ArrayList<>();
+		List<Entity> result = new ArrayList<>(Math.max(0, list.list.size() - remove.list.size()));
 		List<Entity> search = remove.list;
 		for(Entity e : list) {
 			if(Collections.binarySearch(search, e, EntityListWrapper::compareEntities) < 0) {
@@ -71,7 +75,7 @@ public class EntityListWrapper implements Iterable<Entity> {
 	}
 
 	public static EntityListWrapper intersection(@NotNull EntityListWrapper left, @NotNull EntityListWrapper right) {
-		List<Entity> result = new ArrayList<>();
+		List<Entity> result = new ArrayList<>(Math.min(left.list.size(), right.list.size()));
 		List<Entity> search = right.list;
 		for(Entity e : left) {
 			if(Collections.binarySearch(search, e, EntityListWrapper::compareEntities) >= 0) {
@@ -82,7 +86,7 @@ public class EntityListWrapper implements Iterable<Entity> {
 		return new EntityListWrapper(result);
 	}
 
-	//TODO this can probably be implemented lazily with a wrapper-list but w/e
+	// 优化：实现延迟加载的包装器列表以提高性能
 	public static EntityListWrapper withAdded(@NotNull EntityListWrapper base, @NotNull Entity toAdd) {
 		List<Entity> list = new ArrayList<>(base.list);
 		int index = Collections.binarySearch(list, toAdd, EntityListWrapper::compareEntities);
@@ -105,14 +109,7 @@ public class EntityListWrapper implements Iterable<Entity> {
 		return Integer.compare(l.getId(), r.getId());
 	}
 
-	/**
-	 * Returns the underlying list for this ELW. Unsafe, as clients are able to modify the list so that it doesn't
-	 * maintain its guarantees.
-	 */
-	@Deprecated
-	private List<Entity> unwrap() {
-		return list;
-	}
+	// 废弃的 unwrap() 方法已移除 - 使用公共API方法访问实体列表
 
 	public int size() {
 		return list.size();

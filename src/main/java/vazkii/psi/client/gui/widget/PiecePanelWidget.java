@@ -34,7 +34,11 @@ import vazkii.psi.client.gui.button.GuiButtonSpellPiece;
 import vazkii.psi.common.core.handler.PlayerDataHandler;
 import vazkii.psi.common.spell.constant.PieceConstantNumber;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,8 +46,8 @@ public class PiecePanelWidget extends AbstractWidget implements GuiEventListener
 
 	private static final int PIECES_PER_PAGE = 25;
 	public final GuiProgrammer parent;
-	public final List<Button> panelButtons = new ArrayList<>();
-	public final List<GuiButtonSpellPiece> visibleButtons = new ArrayList<>();
+	public final List<Button> panelButtons = new ArrayList<>(32);
+	public final List<GuiButtonSpellPiece> visibleButtons = new ArrayList<>(PIECES_PER_PAGE);
 	public boolean panelEnabled = false;
 	public int panelCursor;
 	public EditBox searchField;

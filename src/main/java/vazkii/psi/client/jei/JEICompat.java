@@ -62,7 +62,7 @@ public class JEICompat implements IModPlugin {
 
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
-		List<ITrickRecipe> trickRecipes = new ArrayList<>();
+		List<ITrickRecipe> trickRecipes = new ArrayList<>(64);
 
 		for(var holder : Minecraft.getInstance().level.getRecipeManager().getRecipes()) {
 			switch(holder.value()) {
@@ -93,10 +93,15 @@ public class JEICompat implements IModPlugin {
 
 		private Cad() {}
 
+		@Override
+		public String getLegacyStringSubtypeInfo(ItemStack itemStack, UidContext context) {
+			return getSubtypeData(itemStack, context);
+		}
+
 		public String getSubtypeData(ItemStack itemStack, UidContext context) {
 			ItemCAD cad = (ItemCAD) itemStack.getItem();
 
-			List<String> strings = new ArrayList<>();
+			List<String> strings = new ArrayList<>(EnumSet.allOf(EnumCADComponent.class).size());
 			for(EnumCADComponent c : EnumSet.allOf(EnumCADComponent.class)) {
 				String s = c.getName() + "." + cad.getComponentInSlot(itemStack, c).getItem().getDescriptionId();
 				strings.add(s);
@@ -110,10 +115,5 @@ public class JEICompat implements IModPlugin {
 			return joiner.toString();
 		}
 
-		@Deprecated(since = "19.9.0")
-		@Override
-		public @NotNull String getLegacyStringSubtypeInfo(@NotNull ItemStack ingredient, @NotNull UidContext context) {
-			return "";
-		}
 	}
 }

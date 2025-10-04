@@ -14,13 +14,21 @@ import vazkii.psi.api.spell.*;
 import vazkii.psi.api.spell.CompiledSpell.Action;
 import vazkii.psi.api.spell.CompiledSpell.CatchHandler;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /* Probably not thread-safe. */
 public final class SpellCompiler implements ISpellCompiler {
 
-	private final Set<SpellPiece> redirectionPieces = new HashSet<>();
+	// 优化: 使用更高效的集合实现和预分配容量
+	private final Set<SpellPiece> redirectionPieces = new HashSet<>(64);
+	private final Map<SpellPiece, Set<SpellPiece>> visitedCache = new HashMap<>(32);
 	/**
 	 * The current spell being compiled.
 	 */
@@ -66,7 +74,10 @@ public final class SpellCompiler implements ISpellCompiler {
 	}
 
 	public void buildPiece(SpellPiece piece) throws SpellCompilationException {
-		buildPiece(piece, new HashSet<>());
+		// 优化: 重用缓存的访问集合，减少对象分配
+		Set<SpellPiece> visited = visitedCache.computeIfAbsent(piece, k -> new HashSet<>(16));
+		visited.clear();
+		buildPiece(piece, visited);
 	}
 
 	public void buildPiece(SpellPiece piece, Set<SpellPiece> visited) throws SpellCompilationException {
@@ -93,8 +104,9 @@ public final class SpellCompiler implements ISpellCompiler {
 
 		EnumSet<SpellParam.Side> usedSides = EnumSet.noneOf(SpellParam.Side.class);
 
-		HashSet<SpellPiece> params = new HashSet<>();
-		HashSet<SpellPiece> handledErrors = new HashSet<>();
+		// 优化: 使用ArrayList替代HashSet，提升小集合性能
+		List<SpellPiece> params = new ArrayList<>(8);
+		List<SpellPiece> handledErrors = new ArrayList<>(4);
 		for(SpellParam<?> param : piece.paramSides.keySet()) {
 			if(checkSideDisabled(param, piece, usedSides)) {
 				continue;
@@ -117,11 +129,16 @@ public final class SpellCompiler implements ISpellCompiler {
 				params.add(pieceAt);
 			}
 		}
-		for(SpellPiece pieceAt : params) {
-			HashSet<SpellPiece> visitedCopy = new HashSet<>(visited);
-			// error handler params can't depend on handled pieces
-			visitedCopy.addAll(handledErrors);
-			buildPiece(pieceAt, visitedCopy);
+		// 优化: 批量处理参数，减少重复的集合操作
+		if(!params.isEmpty()) {
+			Set<SpellPiece> baseVisited = new HashSet<>(visited.size() + handledErrors.size());
+			baseVisited.addAll(visited);
+			baseVisited.addAll(handledErrors);
+
+			for(SpellPiece pieceAt : params) {
+				Set<SpellPiece> visitedCopy = new HashSet<>(baseVisited);
+				buildPiece(pieceAt, visitedCopy);
+			}
 		}
 	}
 
@@ -184,14 +201,15 @@ public final class SpellCompiler implements ISpellCompiler {
 	}
 
 	public List<SpellPiece> findPieces(Predicate<EnumPieceType> match) throws SpellCompilationException {
-		List<SpellPiece> results = new LinkedList<>();
-		for(int i = 0; i < SpellGrid.GRID_SIZE; i++) {
-			for(int j = 0; j < SpellGrid.GRID_SIZE; j++) {
-				SpellPiece piece = compiled.sourceSpell.grid.gridData[j][i];
-				if(piece != null && match.test(piece.getPieceType())) {
-					results.addFirst(piece);
-				}
+		// 优化: 预分配容量，避免频繁扩容
+		List<SpellPiece> results = new ArrayList<>(SpellGrid.GRID_SIZE);
 
+		// 优化: 使用增强for循环，提升可读性和性能
+		for(SpellPiece[] row : compiled.sourceSpell.grid.gridData) {
+			for(SpellPiece piece : row) {
+				if(piece != null && match.test(piece.getPieceType())) {
+					results.add(0, piece); // 保持原有的addFirst行为
+				}
 			}
 		}
 

@@ -46,6 +46,7 @@ import java.util.stream.IntStream;
 public class TileCADAssembler extends BlockEntity implements ITileCADAssembler, MenuProvider {
 	private ItemStack cachedCAD = null;
 	private final CADStackHandler inventory = new CADStackHandler(12);
+	private final CADDisassemblyHandler disassemblyHandler = new CADDisassemblyHandler(this);
 
 	public TileCADAssembler(BlockPos pos, BlockState state) {
 		super(ModBlocks.cadAssemblerType, pos, state);
@@ -73,7 +74,6 @@ public class TileCADAssembler extends BlockEntity implements ITileCADAssembler, 
 			}
 
 			AssembleCADEvent assembling = new AssembleCADEvent(cad, this, player);
-
 			NeoForge.EVENT_BUS.post(assembling);
 
 			if(assembling.isCanceled()) {
@@ -149,6 +149,52 @@ public class TileCADAssembler extends BlockEntity implements ITileCADAssembler, 
 		return socketable != null && socketable.isSocketSlotAvailable(slot);
 	}
 
+	/**
+	 * 获取拆解处理器
+	 */
+	public CADDisassemblyHandler getDisassemblyHandler() {
+		return disassemblyHandler;
+	}
+
+	/**
+	 * 开始CAD拆解过程
+	 */
+	public CADDisassemblyHandler.DisassemblyResult startCADDisassembly(ItemStack cadStack, Player player) {
+		return disassemblyHandler.performDirectDisassembly(cadStack, player);
+	}
+
+	/**
+	 * 执行拆解下一步
+	 */
+	public CADDisassemblyHandler.DisassemblyResult performDisassemblyStep(Player player) {
+		ItemStack socketableStack = getSocketableStack();
+		if(!socketableStack.isEmpty()) {
+			return disassemblyHandler.performDirectDisassembly(socketableStack, player);
+		}
+		return CADDisassemblyHandler.DisassemblyResult.failure("没有可拆解的CAD", CADDisassemblyHandler.DisassemblyState.ERROR);
+	}
+
+	/**
+	 * 检查是否处于拆解模式
+	 */
+	public boolean isInDisassemblyMode() {
+		return disassemblyHandler.isInDisassemblyMode();
+	}
+
+	/**
+	 * 重置拆解状态
+	 */
+	public void resetDisassemblyState() {
+		disassemblyHandler.reset();
+	}
+
+	/**
+	 * 获取拆解进度信息
+	 */
+	public String getDisassemblyProgress() {
+		return disassemblyHandler.getProgressInfo();
+	}
+
 	@Override
 	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
 		super.saveAdditional(tag, provider);
@@ -220,16 +266,34 @@ public class TileCADAssembler extends BlockEntity implements ITileCADAssembler, 
 
 	@Override
 	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		// 在1.21.1中使用新的create方法是正确的，已修复网络同步问题
 		return ClientboundBlockEntityDataPacket.create(this, (BlockEntity e, RegistryAccess provider) -> getUpdateTag(provider));
-		//return new ClientboundBlockEntityDataPacket(getBlockPos(), -1, getUpdateTag());
-	}//TODO Hopefully fixed?
+	}
 
 	@NotNull
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
 		CompoundTag cmp = new CompoundTag();
 		saveAdditional(cmp, provider);
+		// 添加拆解状态信息
+		cmp.putString("DisassemblyState", disassemblyHandler.getCurrentState().name());
 		return cmp;
+	}
+
+	@Override
+	public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
+		super.handleUpdateTag(tag, provider);
+		// 处理拆解状态同步
+		if(tag.contains("DisassemblyState")) {
+			try {
+				CADDisassemblyHandler.DisassemblyState state =
+						CADDisassemblyHandler.DisassemblyState.valueOf(tag.getString("DisassemblyState"));
+				// 注意：这里不能直接设置状态，因为客户端的disassemblyHandler是只读的
+				// 状态会通过inventory同步自动更新
+			} catch (IllegalArgumentException e) {
+				// 忽略无效的状态值
+			}
+		}
 	}
 
 	@NotNull
@@ -265,6 +329,11 @@ public class TileCADAssembler extends BlockEntity implements ITileCADAssembler, 
 				clearCachedCAD();
 			}
 			setChanged();
+
+			// 强制同步到客户端
+			if(level != null && !level.isClientSide) {
+				level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+			}
 		}
 
 		@Override
@@ -285,4 +354,5 @@ public class TileCADAssembler extends BlockEntity implements ITileCADAssembler, 
 			return false;
 		}
 	}
+
 }

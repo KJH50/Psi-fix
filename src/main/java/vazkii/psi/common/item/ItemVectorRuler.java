@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import vazkii.psi.api.internal.Vector3;
 import vazkii.psi.common.item.base.IHUDItem;
 import vazkii.psi.common.item.base.ModDataComponents;
+import vazkii.psi.common.util.DataComponentHelper;
 
 import java.util.List;
 
@@ -54,10 +55,10 @@ public class ItemVectorRuler extends Item implements IHUDItem {
 		ItemStack stack = ctx.getPlayer().getItemInHand(ctx.getHand());
 
 		if(!stack.has(ModDataComponents.SRC_POS) || ctx.getPlayer().isShiftKeyDown()) {
-			stack.set(ModDataComponents.SRC_POS, pos);
+			DataComponentHelper.setPosition(stack, "SRC_POS", pos);
 			stack.remove(ModDataComponents.DST_POS);
 		} else {
-			stack.set(ModDataComponents.DST_POS, pos);
+			DataComponentHelper.setPosition(stack, "DST_POS", pos);
 		}
 
 		return InteractionResult.SUCCESS;
@@ -70,13 +71,13 @@ public class ItemVectorRuler extends Item implements IHUDItem {
 	}
 
 	public Vector3 getVector(ItemStack stack) {
-		BlockPos src = stack.getOrDefault(ModDataComponents.SRC_POS, BlockPos.ZERO);
+		BlockPos src = DataComponentHelper.getPosition(stack, "SRC_POS");
 
 		if(!stack.has(ModDataComponents.DST_POS)) {
 			return Vector3.fromBlockPos(src);
 		}
 
-		BlockPos dst = stack.getOrDefault(ModDataComponents.DST_POS, BlockPos.ZERO);
+		BlockPos dst = DataComponentHelper.getPosition(stack, "DST_POS");
 
 		return Vector3.fromBlockPos(dst.subtract(src));
 	}

@@ -23,7 +23,7 @@ import vazkii.psi.api.internal.IPlayerData;
 import vazkii.psi.api.spell.ISpellAcceptor;
 import vazkii.psi.api.spell.Spell;
 import vazkii.psi.common.Psi;
-import vazkii.psi.common.item.base.ModDataComponents;
+import vazkii.psi.common.util.DataComponentHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,12 +79,12 @@ public class ToolSocketable implements ICapabilityProvider<ItemCapability<?, Voi
 
 	@Override
 	public int getSelectedSlot() {
-		return tool.getOrDefault(ModDataComponents.SELECTED_SLOT, 0);
+		return DataComponentHelper.getSelectedSlot(tool);
 	}
 
 	@Override
 	public void setSelectedSlot(int slot) {
-		tool.set(ModDataComponents.SELECTED_SLOT, slot);
+		DataComponentHelper.setSelectedSlot(tool, slot);
 	}
 
 	@Override

@@ -40,7 +40,7 @@ public class PatchouliUtils {
 		}
 
 		ItemStack[] empty = { ItemStack.EMPTY };
-		List<ItemStack[]> stacks = new ArrayList<>();
+		List<ItemStack[]> stacks = new ArrayList<>(ingredients.size());
 		for(Ingredient ingredient : ingredients) {
 			if(ingredient != null && !ingredient.isEmpty()) {
 				stacks.add(ingredient.getItems());
@@ -68,7 +68,7 @@ public class PatchouliUtils {
 	 * Sets the tooltip to the passed spell piece's tooltip.
 	 */
 	public static void setPieceTooltip(IComponentRenderContext context, SpellPiece piece) {
-		List<Component> tooltip = new ArrayList<>();
+		List<Component> tooltip = new ArrayList<>(8);
 		piece.getTooltip(tooltip);
 		context.setHoverTooltipComponents(tooltip);
 	}
